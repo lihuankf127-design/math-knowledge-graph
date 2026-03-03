@@ -1953,7 +1953,7 @@ function _importRosterFromRows(rows, fileName, nameEl){
   // === 构建小组和学生 ===
   let newStudents=0, movedStudents=0, newGroups=0, leadersSet=0;
 
-  rosterData.forEach(({name, groupName, isLeader}) => {
+  rosterData.forEach(({name, groupName, isLeader, isCityMaster}) => {
     // 确保小组存在
     let targetG = GROUPS.find(g => g.name === groupName);
     if(!targetG){
