@@ -1,0 +1,1929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>五年级数学知识图谱 v13 · 竹子学校</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#1a1d2e;color:#e0e0e0;overflow:hidden;height:100vh;width:100vw;}
+
+/* ───── 顶部栏 ───── */
+#topbar{position:fixed;top:0;left:0;right:0;height:60px;background:#1e2240;border-bottom:1px solid #3a3f5c;display:flex;align-items:center;padding:0 10px;gap:8px;z-index:100;}
+#topbar h1{font-size:0.88rem;font-weight:700;color:#7eb8ff;white-space:nowrap;letter-spacing:1px;}
+.sep{color:#3a3f5c;font-size:1rem;}
+.book-tabs{display:flex;gap:2px;}
+.book-tab{padding:4px 9px;border-radius:5px;border:1px solid #3a3f5c;cursor:pointer;font-size:0.70rem;background:#252a45;color:#aaa;transition:all .15s;white-space:nowrap;}
+.book-tab.active{background:#3a5080;color:#7eb8ff;border-color:#4a6090;}
+#stats-bar{display:flex;gap:6px;margin-left:auto;flex-shrink:0;}
+.stat-chip{background:#252a45;border:1px solid #3a3f5c;border-radius:14px;padding:3px 9px;font-size:0.70rem;color:#aaa;white-space:nowrap;}
+.stat-chip span{color:#7eb8ff;font-weight:700;}
+.tbtn{padding:4px 9px;border-radius:6px;border:none;cursor:pointer;font-size:0.70rem;font-weight:600;transition:all .15s;white-space:nowrap;}
+.tbtn-green{background:#1e3a1e;color:#88dd88;border:1px solid #336633;}
+.tbtn-blue{background:#1e2a45;color:#88aaff;border:1px solid #334466;}
+.tbtn-red{background:#3a2020;color:#ff8888;border:1px solid #663333;}
+.tbtn-yellow{background:#3a3010;color:#ffdd88;border:1px solid #665522;}
+
+/* ───── 左侧学生管理面板 ───── */
+#stu-panel{position:fixed;left:0;top:60px;bottom:0;width:280px;background:#1e2240;border-right:1px solid #3a3f5c;display:flex;flex-direction:column;z-index:90;}
+#stu-search-wrap{padding:8px 8px 6px;border-bottom:1px solid #2a2f4a;flex-shrink:0;display:flex;gap:5px;}
+#stu-search{flex:1;background:#252a45;border:1px solid #3a3f5c;border-radius:6px;color:#e0e0e0;padding:6px 8px;font-size:0.78rem;outline:none;min-width:0;}
+#stu-search::placeholder{color:#6a7090;}
+#stu-search:focus{border-color:#5a6a90;}
+#stu-toolbar{padding:5px 8px;border-bottom:1px solid #2a2f4a;flex-shrink:0;display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+.panel-btn{padding:3px 7px;border-radius:5px;border:none;cursor:pointer;font-size:0.65rem;font-weight:600;white-space:nowrap;transition:all .15s;}
+.panel-btn-green{background:#1e3a1e;color:#88dd88;border:1px solid #336633;}
+.panel-btn-red{background:#3a2020;color:#ff8888;border:1px solid #663333;}
+.panel-btn-blue{background:#1e2a45;color:#88aaff;border:1px solid #334466;}
+.panel-btn-orange{background:#3a2a10;color:#ffcc66;border:1px solid #664422;}
+#stu-header{padding:4px 8px 3px;font-size:0.65rem;color:#5a6080;letter-spacing:1px;flex-shrink:0;display:flex;justify-content:space-between;align-items:center;}
+#stu-header span{color:#7eb8ff;font-size:0.68rem;}
+#group-list{flex:1;overflow-y:auto;}
+#group-list::-webkit-scrollbar{width:3px;}
+#group-list::-webkit-scrollbar-thumb{background:#3a3f5c;border-radius:2px;}
+
+/* 分组块 */
+.grp-block{border-bottom:1px solid #252a40;}
+.grp-hd{display:flex;align-items:center;gap:6px;padding:7px 8px;cursor:pointer;transition:background .12s;user-select:none;}
+.grp-hd:hover{background:#252a45;}
+.grp-hd.drag-over{background:#2a3555;border:1px dashed #5a7aaa;}
+.grp-color{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.grp-name-wrap{flex:1;font-size:0.78rem;font-weight:600;color:#c0c5e0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;min-width:0;}
+.grp-name-input{background:#252a45;border:1px solid #4a6090;border-radius:4px;color:#e0e0e0;padding:1px 5px;font-size:0.78rem;font-weight:600;width:100px;outline:none;}
+.grp-cnt{font-size:0.65rem;color:#5a6080;flex-shrink:0;}
+.grp-arrow{font-size:0.65rem;color:#5a6080;transition:transform .2s;flex-shrink:0;}
+.grp-arrow.open{transform:rotate(90deg);}
+.grp-body{overflow:hidden;}
+.grp-del-btn{padding:1px 5px;border-radius:3px;border:1px solid #663333;background:#3a2020;color:#ff8888;font-size:0.58rem;cursor:pointer;display:none;flex-shrink:0;}
+.grp-hd:hover .grp-del-btn{display:block;}
+
+/* 学生行 */
+.stu-row{display:flex;align-items:center;gap:6px;padding:5px 8px 5px 18px;cursor:pointer;transition:background .12s;position:relative;}
+.stu-row:hover{background:#222640;}
+.stu-row.active{background:#2a3555;border-left:2px solid #5a8aee;}
+.stu-row.drag-over-row{background:#1a2a40;border-top:2px solid #5a8aee;}
+.stu-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:#fff;flex-shrink:0;cursor:grab;}
+.stu-avatar:active{cursor:grabbing;}
+.stu-info{flex:1;min-width:0;}
+.stu-name{font-size:0.78rem;color:#d0d5ef;line-height:1.2;display:flex;align-items:center;gap:3px;}
+.stu-leader{font-size:0.65rem;}
+.stu-progress-wrap{display:flex;align-items:center;gap:4px;}
+.stu-pct{font-size:0.62rem;color:#6a7090;width:26px;text-align:right;flex-shrink:0;}
+.stu-bar{flex:1;height:3px;background:#2a2f4a;border-radius:2px;overflow:hidden;}
+.stu-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#27ae60,#2ecc71);transition:width .3s;}
+.stu-name-input{background:#252a45;border:1px solid #4a6090;border-radius:3px;color:#e0e0e0;padding:1px 4px;font-size:0.76rem;width:70px;outline:none;}
+.stu-actions{display:none;gap:3px;flex-shrink:0;}
+.stu-row:hover .stu-actions{display:flex;}
+.stu-act-btn{padding:2px 5px;border-radius:3px;border:1px solid #3a4060;background:#252a45;color:#8899cc;font-size:0.58rem;cursor:pointer;white-space:nowrap;}
+.stu-act-btn.leader-on{border-color:#665500;background:#3a3010;color:#ffcc44;}
+.stu-act-btn.del{border-color:#663333;background:#3a2020;color:#ff7777;}
+.move-btn{padding:2px 5px;border-radius:3px;border:1px solid #3a4060;background:#252a45;color:#8899cc;font-size:0.6rem;cursor:pointer;display:none;flex-shrink:0;}
+.stu-row:hover .move-btn{display:block;}
+.move-menu{position:fixed;background:#1e2240;border:1px solid #3a4060;border-radius:6px;z-index:500;box-shadow:0 4px 16px rgba(0,0,0,0.5);min-width:120px;}
+.move-menu-item{padding:6px 12px;font-size:0.75rem;cursor:pointer;color:#c0c5e0;transition:background .1s;display:flex;align-items:center;gap:6px;}
+.move-menu-item:hover{background:#252a45;}
+.move-menu-dot{width:8px;height:8px;border-radius:50%;}
+
+/* ───── 画布区域 ───── */
+#canvas-wrap{position:fixed;left:280px;top:60px;right:260px;bottom:0;overflow:hidden;background:#1a1d2e;cursor:grab;}
+#canvas-wrap:active{cursor:grabbing;}
+canvas{display:block;}
+
+/* ───── 右侧详情面板 ───── */
+#detail{position:fixed;right:0;top:60px;bottom:0;width:260px;background:#1e2240;border-left:1px solid #3a3f5c;overflow-y:auto;padding:12px 10px;z-index:90;}
+#detail::-webkit-scrollbar{width:3px;}
+#detail::-webkit-scrollbar-thumb{background:#3a3f5c;}
+.dp-hd{font-size:0.65rem;color:#7eb8ff;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;border-bottom:1px solid #3a3f5c;padding-bottom:4px;}
+.dp-sec{margin-bottom:14px;}
+#dp-stu-name{font-size:0.9rem;font-weight:700;color:#e0e5ff;margin-bottom:2px;}
+#dp-stu-group{font-size:0.72rem;color:#7a8aaa;margin-bottom:10px;display:flex;align-items:center;gap:4px;}
+.pb-row{display:flex;justify-content:space-between;font-size:0.70rem;color:#aaa;margin-bottom:4px;}
+.pb-track{height:7px;background:#2a2f4a;border-radius:4px;overflow:hidden;margin-bottom:10px;}
+.pb-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#27ae60,#2ecc71);transition:width .4s;}
+
+/* 单元折叠块 */
+.unit-blk{margin-bottom:4px;border:1px solid #2a2f4a;border-radius:6px;overflow:hidden;}
+.unit-hd{display:flex;align-items:center;gap:6px;padding:6px 8px;cursor:pointer;transition:background .12s;user-select:none;}
+.unit-hd:hover{background:#252a45;}
+.unit-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.unit-nm{flex:1;font-size:0.72rem;color:#bbc;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+.unit-stat{font-size:0.65rem;color:#6a7a8a;flex-shrink:0;}
+.unit-arr{font-size:0.6rem;color:#5a6a8a;transition:transform .2s;flex-shrink:0;}
+.unit-arr.open{transform:rotate(90deg);}
+.unit-body{display:none;padding:4px 0;}
+.kp-item{display:flex;align-items:center;gap:5px;padding:3px 10px;cursor:pointer;transition:background .1s;}
+.kp-item:hover{background:#222640;}
+.kp-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.kp-txt{font-size:0.68rem;color:#9aa;flex:1;line-height:1.3;}
+.kp-item.mastered .kp-txt{color:#2ecc71;}
+
+/* ───── 提示框 ───── */
+#tooltip{position:fixed;background:rgba(12,15,36,0.97);border:1px solid #4a5070;border-radius:8px;padding:9px 12px;font-size:0.76rem;pointer-events:none;display:none;max-width:240px;z-index:600;box-shadow:0 4px 20px rgba(0,0,0,0.7);}
+#tt-title{font-weight:700;color:#7eb8ff;margin-bottom:2px;font-size:0.82rem;}
+#tt-id{font-size:0.65rem;color:#5a7aaa;margin-bottom:1px;}
+#tt-unit{font-size:0.65rem;color:#888;margin-bottom:5px;}
+#tt-desc{font-size:0.70rem;color:#bbb;line-height:1.5;margin-bottom:5px;}
+#tt-st{font-size:0.72rem;}
+.st-ok{color:#2ecc71;}.st-no{color:#888;}
+
+/* ───── 模态框 ───── */
+#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:700;align-items:center;justify-content:center;}
+#modal.show{display:flex;}
+.modal-box{background:#1e2240;border:1px solid #4a5070;border-radius:12px;padding:20px;max-width:520px;width:92%;max-height:85vh;overflow-y:auto;}
+.modal-box h3{color:#7eb8ff;margin-bottom:8px;font-size:0.9rem;}
+.modal-box p{font-size:0.75rem;color:#aaa;margin-bottom:6px;line-height:1.5;}
+.modal-box textarea{width:100%;height:90px;background:#252a45;border:1px solid #3a3f5c;border-radius:6px;color:#e0e0e0;padding:7px;font-size:0.76rem;margin-bottom:8px;resize:vertical;outline:none;}
+.modal-box input[type=file]{display:none;}
+.upload-area{border:2px dashed #3a4060;border-radius:8px;padding:16px;text-align:center;margin-bottom:10px;cursor:pointer;transition:border-color .2s;}
+.upload-area:hover{border-color:#5a7aaa;}
+.upload-area p{font-size:0.75rem;color:#7a8aaa;margin:0;}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
+.modal-tabs{display:flex;gap:0;margin-bottom:12px;border-bottom:1px solid #3a3f5c;}
+.modal-tab{padding:5px 14px;font-size:0.75rem;cursor:pointer;color:#888;border-bottom:2px solid transparent;transition:all .15s;}
+.modal-tab.active{color:#7eb8ff;border-bottom-color:#7eb8ff;}
+.modal-content{display:none;}.modal-content.active{display:block;}
+
+/* ───── 班级管理 ───── */
+#class-bar{display:flex;align-items:center;gap:4px;flex-shrink:0;padding:0 2px;}
+#class-bar-label{font-size:0.68rem;color:#7a8aaa;white-space:nowrap;}
+#class-select{background:#252a45;border:1px solid #3a3f5c;border-radius:6px;color:#e0e0e0;padding:3px 6px;font-size:0.72rem;outline:none;cursor:pointer;max-width:100px;}
+#class-select:focus{border-color:#5a6a90;}
+.class-btn{padding:3px 7px;border-radius:5px;border:none;cursor:pointer;font-size:0.68rem;font-weight:600;white-space:nowrap;transition:all .15s;}
+.class-btn-add{background:#1e3a1e;color:#88dd88;border:1px solid #336633;}
+.class-btn-rename{background:#1e2a45;color:#88aaff;border:1px solid #334466;}
+.class-btn-del{background:#3a2020;color:#ff8888;border:1px solid #663333;}
+
+/* ───── 日志面板 ───── */
+#log-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:800;align-items:center;justify-content:center;}
+#log-modal.show{display:flex;}
+#log-box{background:#1e2240;border:1px solid #4a5070;border-radius:12px;padding:20px;width:560px;max-width:94%;max-height:80vh;display:flex;flex-direction:column;}
+#log-box h3{color:#7eb8ff;margin-bottom:10px;font-size:1.1rem;flex-shrink:0;}
+#log-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;}
+#log-list::-webkit-scrollbar{width:3px;}
+#log-list::-webkit-scrollbar-thumb{background:#3a3f5c;border-radius:2px;}
+.log-item{background:#252a45;border:1px solid #2a2f4a;border-radius:6px;padding:7px 10px;display:flex;gap:10px;align-items:flex-start;}
+.log-time{font-size:0.82rem;color:#5a6a8a;white-space:nowrap;flex-shrink:0;padding-top:1px;}
+.log-content{font-size:0.88rem;color:#c0c5e0;line-height:1.45;word-break:break-all;}
+.log-tag{display:inline-block;padding:1px 5px;border-radius:3px;font-size:0.72rem;margin-right:5px;font-weight:600;}
+.log-tag-mastery{background:#1e3a1e;color:#88dd88;border:1px solid #336633;}
+.log-tag-import{background:#1e2a45;color:#88aaff;border:1px solid #334466;}
+.log-tag-group{background:#3a2a10;color:#ffcc66;border:1px solid #664422;}
+.log-tag-student{background:#2a1e3a;color:#cc88ff;border:1px solid #553366;}
+.log-tag-reset{background:#3a2020;color:#ff8888;border:1px solid #663333;}
+.log-tag-class{background:#1a2a3a;color:#88ccff;border:1px solid #224466;}
+#log-empty{text-align:center;color:#4a5070;font-size:0.9rem;padding:30px 0;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ 顶部栏 ═══════════ -->
+<div id="topbar">
+  <h1>🎋 五年级数学知识图谱</h1>
+  <div id="class-bar">
+    <span id="class-bar-label">班级：</span>
+    <select id="class-select" onchange="switchClass(this.value)"></select>
+    <button class="class-btn class-btn-add" onclick="addClass()" title="新增班级">➕</button>
+    <button class="class-btn class-btn-rename" onclick="renameClass()" title="重命名班级">✏️</button>
+    <button class="class-btn class-btn-del" onclick="deleteClass()" title="删除班级">🗑️</button>
+  </div>
+  <span class="sep">|</span>
+  <div class="book-tabs">
+    <div class="book-tab active" data-book="all">全册</div>
+    <div class="book-tab" data-book="上册">上册</div>
+    <div class="book-tab" data-book="下册">下册</div>
+  </div>
+  <div id="stats-bar">
+    <div class="stat-chip">已掌握 <span id="st-m">0</span>/<span id="st-t">64</span></div>
+    <div class="stat-chip">掌握率 <span id="st-p">0%</span></div>
+  </div>
+  <button class="tbtn tbtn-yellow" onclick="exportExcel()">📊 导出Excel</button>
+  <button class="tbtn tbtn-blue" onclick="showImport()">📥 导入</button>
+  <button class="tbtn tbtn-red" onclick="resetCurrent()">🔄 重置当前</button>
+  <button class="tbtn tbtn-blue" onclick="showLog()">📋 日志</button>
+</div>
+
+<!-- ═══════════ 左侧学生面板 ═══════════ -->
+<div id="stu-panel">
+  <div id="stu-search-wrap">
+    <input id="stu-search" type="text" placeholder="🔍 搜索学生姓名..." oninput="filterStudents(this.value)">
+  </div>
+  <div id="stu-toolbar">
+    <button class="panel-btn panel-btn-green" onclick="addStudentDialog()">➕ 新增学生</button>
+    <button class="panel-btn panel-btn-blue" onclick="addGroupDialog()">➕ 新增小组</button>
+  </div>
+  <div id="stu-header">
+    <span>学生列表</span>
+    <span id="stu-count-tag">42人 · 1组</span>
+  </div>
+  <div id="group-list"></div>
+</div>
+
+<!-- ═══════════ 画布 ═══════════ -->
+<div id="canvas-wrap"><canvas id="c"></canvas></div>
+
+<!-- ═══════════ 右侧详情 ═══════════ -->
+<div id="detail">
+  <div class="dp-sec">
+    <div id="dp-stu-name">曹意欣</div>
+    <div id="dp-stu-group"><span id="dp-grp-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#7eb8ff;"></span><span id="dp-grp-nm">待分组</span></div>
+    <div class="pb-row"><span>总掌握进度</span><span id="dp-pct">0%</span></div>
+    <div class="pb-track"><div class="pb-fill" id="dp-bar" style="width:0%"></div></div>
+  </div>
+  <div class="dp-sec">
+    <div class="dp-hd">📚 各单元掌握详情</div>
+    <div id="dp-units"></div>
+  </div>
+</div>
+
+<!-- ═══════════ Tooltip ═══════════ -->
+<div id="tooltip">
+  <div id="tt-title"></div>
+  <div id="tt-id"></div>
+  <div id="tt-unit"></div>
+  <div id="tt-desc"></div>
+  <div id="tt-st"></div>
+</div>
+
+<!-- ═══════════ 移动学生菜单 ═══════════ -->
+<div id="move-menu" class="move-menu" style="display:none"></div>
+
+<!-- ═══════════ 新增学生模态框 ═══════════ -->
+<div id="add-stu-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:800;align-items:center;justify-content:center;">
+  <div class="modal-box" style="max-width:360px;">
+    <h3>➕ 新增学生</h3>
+    <p style="color:#7a8aaa;font-size:0.78rem;margin-bottom:12px;">填写学生姓名并选择所在小组</p>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:0.73rem;color:#aaa;display:block;margin-bottom:4px;">学生姓名</label>
+      <input id="new-stu-name" type="text" placeholder="请输入姓名…"
+        style="width:100%;background:#252a45;border:1px solid #3a3f5c;border-radius:6px;color:#e0e0e0;padding:7px 10px;font-size:0.82rem;outline:none;">
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:0.73rem;color:#aaa;display:block;margin-bottom:4px;">加入小组</label>
+      <select id="new-stu-group"
+        style="width:100%;background:#252a45;border:1px solid #3a3f5c;border-radius:6px;color:#e0e0e0;padding:7px 10px;font-size:0.82rem;outline:none;">
+      </select>
+    </div>
+    <div class="modal-btns">
+      <button class="tbtn tbtn-red" onclick="closeAddStuModal()">取消</button>
+      <button class="tbtn tbtn-green" onclick="confirmAddStudent()">✔ 确认添加</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 新增小组模态框 ═══════════ -->
+<div id="add-grp-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:800;align-items:center;justify-content:center;">
+  <div class="modal-box" style="max-width:360px;">
+    <h3>➕ 新增小组</h3>
+    <p style="color:#7a8aaa;font-size:0.78rem;margin-bottom:12px;">创建一个新的学习小组</p>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:0.73rem;color:#aaa;display:block;margin-bottom:4px;">小组名称</label>
+      <input id="new-grp-name" type="text" placeholder="请输入小组名称…"
+        style="width:100%;background:#252a45;border:1px solid #3a3f5c;border-radius:6px;color:#e0e0e0;padding:7px 10px;font-size:0.82rem;outline:none;">
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:0.73rem;color:#aaa;display:block;margin-bottom:6px;">选择颜色</label>
+      <div id="color-picker" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="tbtn tbtn-red" onclick="closeAddGrpModal()">取消</button>
+      <button class="tbtn tbtn-green" onclick="confirmAddGroup()">✔ 确认创建</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 导入模态框 ═══════════ -->
+<div id="modal">
+  <div class="modal-box">
+    <h3>📥 导入掌握数据</h3>
+    <p style="color:#aaa;font-size:0.75rem;margin-bottom:10px;">支持导入本系统导出的 Excel 文件（.xlsx），格式：序号、学生姓名、组名、角色、掌握知识点数（上册）、掌握率（上册）、掌握知识点数（下册）、掌握率（下册）、K01–K64（0/1）</p>
+    <div class="upload-area" onclick="document.getElementById('xlsxFile').click()">
+      <p>📁 点击选择 Excel 文件（.xlsx / .xls）</p>
+      <p style="color:#6a7a8a;font-size:0.68rem;margin-top:3px;">需联网自动加载 Excel 解析库</p>
+      <p id="xlsx-file-name" style="color:#7eb8ff;margin-top:4px;"></p>
+    </div>
+    <input type="file" id="xlsxFile" accept=".xlsx,.xls" onclick="this.value=''" onchange="handleXLSXImport(this)">
+    <div style="margin-top:8px;padding:8px;background:#252a45;border-radius:6px;font-size:0.72rem;color:#7a8aaa;">
+      <strong style="color:#aaa;">导入说明：</strong><br>
+      • 第1行为表头，K01–K64列填 1（已掌握）或 0（未掌握）<br>
+      • 仅更新已存在学生的掌握状态，不会新增或删除学生<br>
+      • 导入前请先导出备份
+    </div>
+    <div class="modal-btns" style="margin-top:12px;">
+      <button class="tbtn tbtn-red" onclick="closeModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ 操作日志模态框 ═══════════ -->
+<div id="log-modal">
+  <div id="log-box">
+    <h3>📋 操作日志</h3>
+    <div style="margin-bottom:10px;">
+      <input id="log-search" type="text" placeholder="🔍 搜索日志内容、标签、时间..." oninput="filterLog()" style="width:100%;box-sizing:border-box;background:#1a1e30;border:1px solid #2a3050;border-radius:6px;color:#c8cce8;padding:7px 12px;font-size:0.88rem;outline:none;" />
+    </div>
+    <div id="log-list"></div>
+    <div id="log-empty" style="display:none;">暂无操作记录</div>
+    <div id="log-no-result" style="display:none;text-align:center;color:#4a5070;font-size:0.9rem;padding:30px 0;">未找到匹配的日志</div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px;">
+      <button class="tbtn tbtn-red" onclick="clearLog()">🗑️ 清空日志</button>
+      <button class="tbtn tbtn-blue" onclick="closeLog()">关闭</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================================================================
+// ① 数据定义
+// ================================================================
+const UNITS=[
+  // 上册单元
+  {id:"U上1", name:"小数除法",       book:"上册", color:"#e74c3c"},
+  {id:"U上2", name:"倍数与因数",     book:"上册", color:"#3498db"},
+  {id:"U上3", name:"整理与复习",     book:"上册", color:"#95a5a6"},
+  {id:"U上4", name:"轴对称与平移",   book:"上册", color:"#1abc9c"},
+  {id:"U上5", name:"多边形面积",     book:"上册", color:"#27ae60"},
+  {id:"U上6", name:"组合图形面积",   book:"上册", color:"#16a085"},
+  {id:"U上7", name:"分数的意义",     book:"上册", color:"#f39c12"},
+  {id:"U上8", name:"可能性",         book:"上册", color:"#a29bfe"},
+  {id:"U上9", name:"数学好玩&总复习",book:"上册", color:"#636e72"},
+  // 下册单元
+  {id:"U下1", name:"分数加减法",     book:"下册", color:"#9b59b6"},
+  {id:"U下2", name:"长方体（一）",   book:"下册", color:"#00bcd4"},
+  {id:"U下3", name:"分数乘法",       book:"下册", color:"#cddc39"},
+  {id:"U下4", name:"长方体（二）体积",book:"下册",color:"#4caf50"},
+  {id:"U下5", name:"分数除法",       book:"下册", color:"#ff9800"},
+  {id:"U下6", name:"确定位置",       book:"下册", color:"#607d8b"},
+  {id:"U下7", name:"方程",           book:"下册", color:"#ff5722"},
+  {id:"U下8", name:"统计与概率",     book:"下册", color:"#7c4dff"},
+  {id:"U下9", name:"数学好玩",       book:"下册", color:"#636e72"},
+];
+
+const NODES=[
+  // ── 上册 U上1 小数除法 ──
+  {id:"K01",unit:"U上1",name:"小数除整数",  desc:"小数除以整数（算理：小数点→整数除法；竖式对齐）"},
+  {id:"K02",unit:"U上1",name:"除以小数",    desc:"一个数除以小数（同时扩大被除数与除数）"},
+  {id:"K03",unit:"U上1",name:"商的估计",    desc:"商的估计数（按要求取估计；与比较结合）"},
+  {id:"K04",unit:"U上1",name:"循环小数",    desc:"循环小数（循环节识别、读写）"},
+  {id:"K05",unit:"U上1",name:"小数混合运算",desc:"小数四则混合运算（顺序、括号）"},
+  {id:"K06",unit:"U上1",name:"除法应用建模",desc:"小数除法应用建模（时间/单价/速度等）"},
+  // ── 上册 U上2 倍数与因数 ──
+  {id:"K07",unit:"U上2",name:"倍数因数意义",desc:"倍数与因数的意义（乘法关系）"},
+  {id:"K08",unit:"U上2",name:"2和5的倍数",  desc:"2、5的倍数特征（整除判定入门）"},
+  {id:"K09",unit:"U上2",name:"3的倍数",     desc:"3的倍数特征"},
+  {id:"K10",unit:"U上2",name:"寻找因数",    desc:"寻找因数（列表/系统寻找）"},
+  {id:"K11",unit:"U上2",name:"质数与合数",  desc:"质数与合数（判定与分类）"},
+  // ── 上册 U上3 整理与复习 ──
+  {id:"K12",unit:"U上3",name:"阶段复盘",    desc:"阶段复盘：计算技能+数量关系+解决问题策略回顾"},
+  // ── 上册 U上4 轴对称与平移 ──
+  {id:"K13",unit:"U上4",name:"轴对称再认识",desc:"轴对称图形再认识（对称轴/对应点/折叠验证）"},
+  {id:"K14",unit:"U上4",name:"平移",        desc:"平移（方向与距离；对应点）"},
+  {id:"K15",unit:"U上4",name:"设计图案",    desc:"设计图案（轴对称/平移生成）"},
+  // ── 上册 U上5 多边形面积 ──
+  {id:"K16",unit:"U上5",name:"面积比较",    desc:"面积比较与面积观（单位统一/割补比较）"},
+  {id:"K17",unit:"U上5",name:"底与高",      desc:"底与高的认识（对应量）"},
+  {id:"K18",unit:"U上5",name:"平行四边形面积",desc:"平行四边形面积（割补转化成长方形）"},
+  {id:"K19",unit:"U上5",name:"三角形面积",  desc:"三角形面积（与平行四边形关系）"},
+  {id:"K20",unit:"U上5",name:"梯形面积",    desc:"梯形面积（转化/分割思想）"},
+  {id:"K21",unit:"U上5",name:"面积实际问题",desc:"解决面积实际问题（选公式与数据）"},
+  // ── 上册 U上6 组合图形面积 ──
+  {id:"K22",unit:"U上6",name:"组合图形分割",desc:"组合图形分割与拼合（分—算—合策略）"},
+  {id:"K23",unit:"U上6",name:"面积单位依托",desc:"面积单位与实际依托（成长的脚印/接地气的平方等）"},
+  // ── 上册 U上7 分数的意义 ──
+  {id:"K24",unit:"U上7",name:"真假分数",    desc:"真分数、假分数（与1的关系；数轴/图形模型）"},
+  {id:"K25",unit:"U上7",name:"分数与除法",  desc:"分数与除法（平均分/比与份额统一理解）"},
+  {id:"K26",unit:"U上7",name:"分数基本性质",desc:"分数基本性质（同值变形核心）"},
+  {id:"K27",unit:"U上7",name:"最大公因数",  desc:"最大公因数（服务约分/通分准备）"},
+  {id:"K28",unit:"U上7",name:"约分",        desc:"约分"},
+  {id:"K29",unit:"U上7",name:"通分",        desc:"通分"},
+  {id:"K30",unit:"U上7",name:"最小公倍数",  desc:"最小公倍数（通分/比较/加减准备）"},
+  {id:"K31",unit:"U上7",name:"分数大小比较",desc:"分数大小比较（同分母/同分子/通分/数轴）"},
+  // ── 上册 U上8 可能性 ──
+  {id:"K32",unit:"U上8",name:"可能性大小",  desc:"可能性大小（一定/可能/不可能→更可能/更不可能）"},
+  {id:"K33",unit:"U上8",name:"实验描述可能性",desc:"用实验与数据描述可能性（初步频率解读）"},
+  // ── 上册 U上9 数学好玩&总复习 ──
+  {id:"K34",unit:"U上9",name:"数学好玩活动",desc:"数学好玩：七巧板/摸球等活动（空间/概率洞察）"},
+  {id:"K35",unit:"U上9",name:"上册总复习",  desc:"总复习（上册综合）"},
+  // ── 下册 U下1 分数加减法 ──
+  {id:"K36",unit:"U下1",name:"异分母加减",  desc:"异分母分数加减（通分思维；绘图支持）"},
+  {id:"K37",unit:"U下1",name:"加减混合运算",desc:"分数加减'极性'（顺序；与整数极性联系）"},
+  {id:"K38",unit:"U下1",name:"分数小数互化",desc:"分数与小数互化（有限小数为主；互化与比较/应用连通）"},
+  {id:"K39",unit:"U下1",name:"加减实际问题",desc:"分数加减实际问题（列式与解释）"},
+  // ── 下册 U下2 长方体（一） ──
+  {id:"K40",unit:"U下2",name:"长正方体特征",desc:"认识长方体/正方体（特征；面/棱/顶点）"},
+  {id:"K41",unit:"U下2",name:"展开与折叠",  desc:"展开与折叠（空间想象+操作）"},
+  {id:"K42",unit:"U下2",name:"露在外面的面",desc:"露在外面的面（规律发现）"},
+  {id:"K43",unit:"U下2",name:"表面积",      desc:"表面积（意义与计算）"},
+  // ── 下册 U下3 分数乘法 ──
+  {id:"K44",unit:"U下3",name:"分数乘整数",  desc:"分数乘整数（意义：几个同分数/求几分之几）"},
+  {id:"K45",unit:"U下3",name:"分数乘分数",  desc:"分数乘分数（意义与模型；约分）"},
+  {id:"K46",unit:"U下3",name:"倒数",        desc:"倒数（与除法建立联系）"},
+  // ── 下册 U下4 长方体（二）体积 ──
+  {id:"K47",unit:"U下4",name:"体积与容积",  desc:"体积与容积（概念区分与联系）"},
+  {id:"K48",unit:"U下4",name:"体积单位",    desc:"体积单位（立方厘米/分米/米等）"},
+  {id:"K49",unit:"U下4",name:"体积单位换算",desc:"体积单位换算"},
+  {id:"K50",unit:"U下4",name:"长方体体积",  desc:"长方体/正方体体积计算"},
+  {id:"K51",unit:"U下4",name:"不规则体积",  desc:"不规则物体体积测量（排水法等）"},
+  // ── 下册 U下5 分数除法 ──
+  {id:"K52",unit:"U下5",name:"分数除整数",  desc:"分数除以整数"},
+  {id:"K53",unit:"U下5",name:"除数是分数",  desc:"除数是分数的除法（乘以倒数思想来源）"},
+  {id:"K54",unit:"U下5",name:"方程解分数题",desc:"用方程解决分数问题（数量关系公式化）"},
+  // ── 下册 U下6 确定位置 ──
+  {id:"K55",unit:"U下6",name:"方向距离定位",desc:"方向+距离确定位置（路线描述）"},
+  {id:"K56",unit:"U下6",name:"自建参照系",  desc:"自建参照系确定相对位置"},
+  // ── 下册 U下7 方程 ──
+  {id:"K57",unit:"U下7",name:"合并同类项",  desc:"解形如2x−x=3、ax±x=b（合并同类/等式性质雏形）"},
+  {id:"K58",unit:"U下7",name:"方程解实际题",desc:"用方程解决实际问题（典型数量关系）"},
+  // ── 下册 U下8 统计与概率 ──
+  {id:"K59",unit:"U下8",name:"复式条形统计图",desc:"复式条形统计图"},
+  {id:"K60",unit:"U下8",name:"复式折线统计图",desc:"复式折线统计图"},
+  {id:"K61",unit:"U下8",name:"平均数再认识",desc:"平均数再认识（意义、计算与应用）"},
+  // ── 下册 U下9 数学好玩 ──
+  {id:"K62",unit:"U下9",name:"综合实践设计",desc:"综合实践-设计方案"},
+  {id:"K63",unit:"U下9",name:"空间与图形",  desc:"空间与图形"},
+  {id:"K64",unit:"U下9",name:"表面积与优化",desc:"表面积与优化"},
+];
+
+const LINKS=[
+  // U上1 小数除法内部
+  {s:"K01",t:"K02"},{s:"K01",t:"K03"},{s:"K03",t:"K04"},{s:"K01",t:"K05"},{s:"K05",t:"K06"},{s:"K02",t:"K06"},
+  // U上2 倍数与因数内部
+  {s:"K07",t:"K08"},{s:"K07",t:"K09"},{s:"K07",t:"K10"},{s:"K10",t:"K11"},
+  // U上4 轴对称与平移内部
+  {s:"K13",t:"K14"},{s:"K13",t:"K15"},{s:"K14",t:"K15"},
+  // U上5 多边形面积内部
+  {s:"K16",t:"K17"},{s:"K17",t:"K18"},{s:"K17",t:"K19"},{s:"K17",t:"K20"},{s:"K18",t:"K21"},{s:"K19",t:"K21"},{s:"K20",t:"K21"},
+  // U上6 组合图形面积内部
+  {s:"K22",t:"K23"},
+  // U上7 分数的意义内部
+  {s:"K24",t:"K25"},{s:"K25",t:"K26"},{s:"K26",t:"K27"},{s:"K27",t:"K28"},{s:"K26",t:"K29"},{s:"K30",t:"K29"},{s:"K28",t:"K31"},{s:"K29",t:"K31"},
+  // U上8 可能性内部
+  {s:"K32",t:"K33"},
+  // U下1 分数加减法内部
+  {s:"K36",t:"K37"},{s:"K36",t:"K38"},{s:"K37",t:"K39"},{s:"K38",t:"K39"},
+  // U下2 长方体（一）内部
+  {s:"K40",t:"K41"},{s:"K40",t:"K42"},{s:"K41",t:"K43"},{s:"K42",t:"K43"},
+  // U下3 分数乘法内部
+  {s:"K44",t:"K45"},{s:"K45",t:"K46"},
+  // U下4 体积内部
+  {s:"K47",t:"K48"},{s:"K48",t:"K49"},{s:"K49",t:"K50"},{s:"K50",t:"K51"},
+  // U下5 分数除法内部
+  {s:"K52",t:"K53"},{s:"K46",t:"K52"},{s:"K53",t:"K54"},
+  // U下6 确定位置内部
+  {s:"K55",t:"K56"},
+  // U下7 方程内部
+  {s:"K57",t:"K58"},
+  // U下8 统计内部
+  {s:"K59",t:"K61"},{s:"K60",t:"K61"},
+  // 跨单元连接
+  {s:"K10",t:"K27",cross:true},   // 因数→最大公因数
+  {s:"K11",t:"K27",cross:true},   // 质合数→最大公因数
+  {s:"K29",t:"K36",cross:true},   // 通分→异分母加减
+  {s:"K05",t:"K37",cross:true},   // 小数混合→分数混合
+  {s:"K38",t:"K37",cross:true},   // 分数小数互化→加减混合
+  {s:"K36",t:"K44",cross:true},   // 分数加减→分数乘法
+  {s:"K46",t:"K53",cross:true},   // 倒数→除数是分数
+  {s:"K54",t:"K58",cross:true},   // 方程解分数题→方程实际题
+  {s:"K21",t:"K43",cross:true},   // 面积实际→表面积
+  {s:"K40",t:"K47",cross:true},   // 长方体特征→体积
+  {s:"K43",t:"K64",cross:true},   // 表面积→表面积与优化
+  {s:"K13",t:"K55",cross:true},   // 轴对称→方向定位
+  {s:"K22",t:"K43",cross:true},   // 组合图形→表面积
+  {s:"K06",t:"K39",cross:true},   // 除法应用→加减实际
+];
+
+// GROUPS由loadCurrentClassData()动态加载，这里仅为初始占位
+let GROUPS = [];
+
+// ================================================================
+// ② 状态变量
+// ================================================================
+let curStudent = "曹意欣";
+let masteredMap = {};
+let curBookFilter = "all";
+let hoveredNode = null;
+let groupCollapsed = {};
+let unitDetailOpen = {};
+let dragSrcStudent = null;
+let dragSrcGid = null;
+let openMoveMenu = null;
+
+// ================================================================
+// ③ 班级管理 & localStorage
+// ================================================================
+const LS_CLASSES   = 'mathKG_v13_classes';   // 班级列表 [{id,name}]
+const LS_CUR_CLASS = 'mathKG_v13_curClass';  // 当前班级id
+const LS_LOG       = 'mathKG_v13_log';
+
+// 班级数据 key 生成器
+function lsKeyData(cid){ return 'mathKG_v13_data_' + cid; }
+function lsKeyGrp(cid) { return 'mathKG_v13_grp_'  + cid; }
+
+// 班级列表（[{id,name}]）
+let CLASSES = [];
+let curClassId = '';
+
+// 默认初始班级数据
+const DEFAULT_CLASS_NAME = '5.1班';
+const DEFAULT_GROUPS = [
+  {id:"G1",name:"待分组",color:"#7eb8ff",leader:"",
+   members:["曹意欣","曾思弦","曾艺","陈霁谦","陈司翰","陈逸轩","陈语萱","陈子淇",
+            "程熙耀","邓槿贤","段荌荌","段钧瑞","范修齐","韩可鑫","何子墨","胡峻熙",
+            "黎钰涵","李嘉羿","李彦羲","刘睿辰","刘颖","马天灏","马伟杰","牟鑫蕊",
+            "宋心怡","陶贝妮","陶诗芩","涂语淇","王睿慈","王睿熙","王子豪","魏宇萱",
+            "吴柏希","吴浩宇","吴煜萱","夏子轩","杨建华","张瑞馨","张婉艺","张梓萱",
+            "郑源璟","郑云兮"]},
+];
+
+function loadClasses(){
+  try{
+    const raw = localStorage.getItem(LS_CLASSES);
+    if(raw) CLASSES = JSON.parse(raw);
+  }catch(e){}
+  // 如果没有任何班级，创建默认班级
+  if(!CLASSES.length){
+    const cid = 'C' + Date.now();
+    CLASSES = [{id: cid, name: DEFAULT_CLASS_NAME}];
+    saveClassList();
+    // 将默认GROUPS写入该班级
+    localStorage.setItem(lsKeyGrp(cid), JSON.stringify(DEFAULT_GROUPS));
+  }
+  // 加载当前班级
+  try{
+    const saved = localStorage.getItem(LS_CUR_CLASS);
+    curClassId = (saved && CLASSES.find(c=>c.id===saved)) ? saved : CLASSES[0].id;
+  }catch(e){ curClassId = CLASSES[0].id; }
+}
+
+function saveClassList(){
+  localStorage.setItem(LS_CLASSES, JSON.stringify(CLASSES));
+}
+
+function loadCurrentClassData(){
+  // 加载当前班级的GROUPS
+  try{
+    const raw = localStorage.getItem(lsKeyGrp(curClassId));
+    if(raw) GROUPS = JSON.parse(raw);
+    else GROUPS = JSON.parse(JSON.stringify(DEFAULT_GROUPS));
+  }catch(e){ GROUPS = JSON.parse(JSON.stringify(DEFAULT_GROUPS)); }
+  // 加载当前班级的masteredMap
+  masteredMap = {};
+  try{
+    const raw = localStorage.getItem(lsKeyData(curClassId));
+    if(raw){ const p=JSON.parse(raw); for(const k in p) masteredMap[k]=new Set(p[k]); }
+  }catch(e){}
+  getAllStudents().forEach(s=>{ if(!masteredMap[s]) masteredMap[s]=new Set(); });
+}
+
+function saveData(){
+  const out={};
+  for(const k in masteredMap) out[k]=[...masteredMap[k]];
+  localStorage.setItem(lsKeyData(curClassId), JSON.stringify(out));
+  broadcastSync();
+}
+
+function saveGroups(){
+  localStorage.setItem(lsKeyGrp(curClassId), JSON.stringify(GROUPS));
+  broadcastSync();
+}
+
+// 兼容旧函数名
+function loadData(){ loadCurrentClassData(); }
+function loadGroups(){ /* 已在loadCurrentClassData中处理 */ }
+
+// 班级切换
+function switchClass(cid){
+  if(cid === curClassId) return;
+  // 保存当前班级数据（已在各操作中实时保存）
+  curClassId = cid;
+  localStorage.setItem(LS_CUR_CLASS, cid);
+  loadCurrentClassData();
+  groupCollapsed = {};
+  unitDetailOpen = {};
+  buildStudentPanel();
+  const firstStu = GROUPS[0]?.members[0];
+  curStudent = firstStu || '';
+  if(curStudent) selectStudent(curStudent);
+  updateAllStudentProgress();
+  updateClassSelect();
+  logAction('class', '切换到班级「' + getCurrentClassName() + '」');
+}
+
+function getCurrentClassName(){
+  return CLASSES.find(c=>c.id===curClassId)?.name || '';
+}
+
+function updateClassSelect(){
+  const sel = document.getElementById('class-select');
+  if(!sel) return;
+  sel.innerHTML = CLASSES.map(c=>
+    `<option value="${c.id}"${c.id===curClassId?' selected':''}>${escHtml(c.name)}</option>`
+  ).join('');
+}
+
+function addClass(){
+  const name = prompt('请输入新班级名称：', '新班级');
+  if(!name || !name.trim()) return;
+  const trimmed = name.trim();
+  if(CLASSES.find(c=>c.name===trimmed)){ alert('班级「'+trimmed+'」已存在！'); return; }
+  const cid = 'C' + Date.now();
+  CLASSES.push({id: cid, name: trimmed});
+  saveClassList();
+  // 新班级初始化一个空的待分组
+  const emptyGroups = [{id:'G1',name:'待分组',color:'#7eb8ff',leader:'',members:[]}];
+  localStorage.setItem(lsKeyGrp(cid), JSON.stringify(emptyGroups));
+  logAction('class', '新增班级「'+trimmed+'」');
+  switchClass(cid);
+}
+
+function renameClass(){
+  const cur = CLASSES.find(c=>c.id===curClassId);
+  if(!cur) return;
+  const name = prompt('请输入新班级名称：', cur.name);
+  if(!name || !name.trim()) return;
+  const trimmed = name.trim();
+  if(trimmed === cur.name) return;
+  if(CLASSES.find(c=>c.id!==curClassId && c.name===trimmed)){ alert('班级「'+trimmed+'」已存在！'); return; }
+  logAction('class', '重命名班级「'+cur.name+'」→「'+trimmed+'」');
+  cur.name = trimmed;
+  saveClassList();
+  updateClassSelect();
+}
+
+function deleteClass(){
+  if(CLASSES.length <= 1){ alert('至少保留一个班级，无法删除！'); return; }
+  const cur = CLASSES.find(c=>c.id===curClassId);
+  if(!cur) return;
+  if(!confirm('确定删除班级「'+cur.name+'」及其所有学生数据吗？\n\n此操作不可恢复！')) return;
+  // 清除该班级的localStorage数据
+  localStorage.removeItem(lsKeyData(curClassId));
+  localStorage.removeItem(lsKeyGrp(curClassId));
+  logAction('class', '删除班级「'+cur.name+'」');
+  const idx = CLASSES.findIndex(c=>c.id===curClassId);
+  CLASSES.splice(idx, 1);
+  saveClassList();
+  // 切换到剩余班级中的一个
+  const nextClass = CLASSES[Math.max(0, idx-1)];
+  curClassId = nextClass.id;
+  localStorage.setItem(LS_CUR_CLASS, curClassId);
+  loadCurrentClassData();
+  groupCollapsed = {};
+  unitDetailOpen = {};
+  buildStudentPanel();
+  const firstStu = GROUPS[0]?.members[0];
+  curStudent = firstStu || '';
+  if(curStudent) selectStudent(curStudent);
+  updateAllStudentProgress();
+  updateClassSelect();
+}
+
+// ================================================================
+// ④ 实时广播同步（BroadcastChannel）
+// ================================================================
+const KG_CHANNEL = new BroadcastChannel('mathKG_v13_sync');
+function broadcastSync(){
+  try{
+    const out={};
+    for(const k in masteredMap) out[k]=[...masteredMap[k]];
+    KG_CHANNEL.postMessage({
+      type: 'kg_update',
+      timestamp: Date.now(),
+      masteredMap: out,
+      groups: JSON.parse(JSON.stringify(GROUPS))
+    });
+  }catch(e){ console.warn('broadcastSync error', e); }
+}
+
+function getAllStudents(){
+  return GROUPS.flatMap(g=>g.members);
+}
+
+function getStudentGroup(name){
+  return GROUPS.find(g=>g.members.includes(name));
+}
+
+function isMastered(id){
+  return masteredMap[curStudent]?.has(id);
+}
+
+// ================================================================
+// ⑤ 画布 & 物理引擎
+// ================================================================
+let canvas, ctx, W, H;
+let nodes=[], edges=[];
+let camX=0, camY=0, camScale=1;
+let isDragging=false, lastMouseX=0, lastMouseY=0;
+let simTick=0;
+const NODE_R = 18;
+const VIRT_W = 2600, VIRT_H = 1400;
+
+// 单元布局（18个单元，上册9个+下册9个）
+const UNIT_LAYOUT = {
+  // 上册第一行（y=0.12）
+  "U上1":{cx:0.08,cy:0.12},
+  "U上2":{cx:0.22,cy:0.12},
+  "U上3":{cx:0.36,cy:0.12},
+  "U上4":{cx:0.50,cy:0.12},
+  "U上5":{cx:0.64,cy:0.12},
+  // 上册第二行（y=0.30）
+  "U上6":{cx:0.08,cy:0.30},
+  "U上7":{cx:0.30,cy:0.30},
+  "U上8":{cx:0.64,cy:0.30},
+  "U上9":{cx:0.82,cy:0.30},
+  // 下册第一行（y=0.55）
+  "U下1":{cx:0.08,cy:0.55},
+  "U下2":{cx:0.22,cy:0.55},
+  "U下3":{cx:0.36,cy:0.55},
+  "U下4":{cx:0.50,cy:0.55},
+  "U下5":{cx:0.64,cy:0.55},
+  // 下册第二行（y=0.80）
+  "U下6":{cx:0.14,cy:0.80},
+  "U下7":{cx:0.36,cy:0.80},
+  "U下8":{cx:0.60,cy:0.80},
+  "U下9":{cx:0.82,cy:0.80},
+};
+
+function initNodes(){
+  const CLR = 72;
+  nodes = NODES.map(n=>{
+    const ul = UNIT_LAYOUT[n.unit] || {cx:0.5,cy:0.5};
+    const unitNodes = NODES.filter(x=>x.unit===n.unit);
+    const idx = unitNodes.findIndex(x=>x.id===n.id);
+    const total = unitNodes.length;
+    const angle = (idx/total)*Math.PI*2 - Math.PI/2;
+    const cx = ul.cx * VIRT_W, cy = ul.cy * VIRT_H;
+    return {
+      ...n,
+      x: cx + Math.cos(angle)*CLR + (Math.random()-0.5)*8,
+      y: cy + Math.sin(angle)*CLR + (Math.random()-0.5)*8,
+      vx:0, vy:0,
+      fx: cx + Math.cos(angle)*CLR,
+      fy: cy + Math.sin(angle)*CLR,
+    };
+  });
+  edges = LINKS.map(l=>({
+    s: nodes.find(n=>n.id===l.s),
+    t: nodes.find(n=>n.id===l.t),
+    cross: !!l.cross
+  })).filter(e=>e.s&&e.t);
+}
+
+function simulate(){
+  if(simTick>500) return;
+  simTick++;
+  const alpha = Math.max(0.005, 0.25*(1-simTick/500));
+
+  for(let i=0;i<nodes.length;i++){
+    for(let j=i+1;j<nodes.length;j++){
+      const a=nodes[i], b=nodes[j];
+      const dx=b.x-a.x, dy=b.y-a.y;
+      const dist=Math.sqrt(dx*dx+dy*dy)||1;
+      const minD = a.unit===b.unit ? 110 : 65;
+      if(dist<minD){
+        const f=(minD-dist)/dist*0.6*alpha;
+        a.vx-=dx*f; a.vy-=dy*f;
+        b.vx+=dx*f; b.vy+=dy*f;
+      }
+    }
+  }
+
+  edges.forEach(e=>{
+    const dx=e.t.x-e.s.x, dy=e.t.y-e.s.y;
+    const dist=Math.sqrt(dx*dx+dy*dy)||1;
+    const ideal = e.cross ? 250 : 85;
+    const f=(dist-ideal)/dist*0.07*alpha;
+    e.s.vx+=dx*f; e.s.vy+=dy*f;
+    e.t.vx-=dx*f; e.t.vy-=dy*f;
+  });
+
+  nodes.forEach(n=>{
+    n.vx += (n.fx-n.x)*0.04*alpha;
+    n.vy += (n.fy-n.y)*0.04*alpha;
+  });
+
+  nodes.forEach(n=>{
+    n.vx*=0.82; n.vy*=0.82;
+    n.x+=n.vx; n.y+=n.vy;
+  });
+}
+
+function worldToScreen(wx,wy){
+  return [(wx+camX)*camScale, (wy+camY)*camScale];
+}
+function screenToWorld(sx,sy){
+  return [sx/camScale-camX, sy/camScale-camY];
+}
+function getUnitColor(uid){
+  return UNITS.find(u=>u.id===uid)?.color || '#888';
+}
+
+function draw(){
+  if(!ctx) return;
+  ctx.clearRect(0,0,W,H);
+  if(!nodes.length) return;
+
+  const unitGroups={};
+  nodes.forEach(n=>{ if(!unitGroups[n.unit]) unitGroups[n.unit]=[]; unitGroups[n.unit].push(n); });
+
+  // 绘制单元背景气泡
+  UNITS.forEach(u=>{
+    const grp = unitGroups[u.id];
+    if(!grp||!grp.length) return;
+    if(curBookFilter!=='all' && u.book!==curBookFilter) return;
+    const cx = grp.reduce((s,n)=>s+n.x,0)/grp.length;
+    const cy = grp.reduce((s,n)=>s+n.y,0)/grp.length;
+    const maxD = Math.max(...grp.map(n=>Math.hypot(n.x-cx,n.y-cy)))+NODE_R+14;
+    const [sx,sy] = worldToScreen(cx,cy);
+    const sr = maxD*camScale;
+    ctx.beginPath();
+    ctx.arc(sx,sy,sr,0,Math.PI*2);
+    ctx.fillStyle = u.color+'18';
+    ctx.strokeStyle = u.color+'45';
+    ctx.lineWidth = 1;
+    ctx.fill(); ctx.stroke();
+    ctx.fillStyle = u.color+'cc';
+    const fs = Math.max(9, 11*camScale);
+    ctx.font = `bold ${fs}px PingFang SC,Microsoft YaHei,sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(u.name, sx, sy-sr+14*camScale);
+  });
+
+  // 绘制边
+  edges.forEach(e=>{
+    if(!e.s||!e.t) return;
+    const su = UNITS.find(u=>u.id===e.s.unit);
+    const tu = UNITS.find(u=>u.id===e.t.unit);
+    if(curBookFilter!=='all'){
+      if(su?.book!==curBookFilter && tu?.book!==curBookFilter) return;
+    }
+    const [x1,y1] = worldToScreen(e.s.x,e.s.y);
+    const [x2,y2] = worldToScreen(e.t.x,e.t.y);
+    ctx.beginPath();
+    ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+    if(e.cross){
+      ctx.setLineDash([4,4]);
+      ctx.strokeStyle = '#4a5068';
+    } else {
+      ctx.setLineDash([]);
+      ctx.strokeStyle = '#3a4060';
+    }
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  // 绘制节点
+  const labelFs = Math.max(8, 9.5*camScale);
+  ctx.font = `${labelFs}px PingFang SC,Microsoft YaHei,sans-serif`;
+
+  nodes.forEach(n=>{
+    const u = UNITS.find(u=>u.id===n.unit);
+    if(curBookFilter!=='all' && u?.book!==curBookFilter) return;
+    const [sx,sy] = worldToScreen(n.x,n.y);
+    const r = NODE_R*camScale;
+    const mastered = isMastered(n.id);
+    const isHov = hoveredNode===n.id;
+    const nr = isHov ? r*1.18 : r;
+
+    ctx.globalAlpha = 1;
+    ctx.beginPath();
+    ctx.arc(sx,sy,nr,0,Math.PI*2);
+    if(mastered){
+      ctx.fillStyle = '#27ae60';
+      ctx.strokeStyle = '#2ecc71';
+      ctx.lineWidth = 2.5;
+      if(isHov){ ctx.shadowBlur=14; ctx.shadowColor='#2ecc71'; }
+    } else {
+      ctx.fillStyle = '#3a3f55';
+      ctx.strokeStyle = u?.color||'#888';
+      ctx.lineWidth = isHov ? 2 : 1.5;
+    }
+    ctx.fill(); ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // 节点内显示编号
+    const idLabel = n.id;
+    const idFs = Math.max(6, 7.5*camScale);
+    ctx.font = `bold ${idFs}px PingFang SC,Microsoft YaHei,sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = mastered ? '#ffffff' : '#9aa0bc';
+    ctx.fillText(idLabel, sx, sy + idFs*0.38);
+
+    // 节点下方名称标签
+    ctx.font = `${labelFs}px PingFang SC,Microsoft YaHei,sans-serif`;
+    const label = n.name.length > 5 ? n.name.substring(0,4)+'…' : n.name;
+    ctx.fillStyle = mastered ? '#a8eac0' : '#9aa0bc';
+    ctx.globalAlpha = 1;
+    ctx.fillText(label, sx, sy + r + labelFs + 2);
+  });
+  ctx.globalAlpha = 1;
+}
+
+function loop(){
+  simulate();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+// ================================================================
+// ⑥ 命中检测 & 事件
+// ================================================================
+function hitTest(sx,sy){
+  const [wx,wy] = screenToWorld(sx,sy);
+  for(let i=nodes.length-1;i>=0;i--){
+    const n=nodes[i];
+    const u=UNITS.find(u=>u.id===n.unit);
+    if(curBookFilter!=='all' && u?.book!==curBookFilter) continue;
+    if(Math.hypot(n.x-wx,n.y-wy) <= NODE_R*1.3) return n;
+  }
+  return null;
+}
+
+function initEvents(){
+  canvas.addEventListener('mousedown',e=>{
+    if(e.button!==0) return;
+    closeMoveMenu();
+    const n = hitTest(e.offsetX,e.offsetY);
+    if(n){
+      toggleMastery(n.id);
+    } else {
+      isDragging=true;
+      lastMouseX=e.clientX; lastMouseY=e.clientY;
+    }
+  });
+  canvas.addEventListener('mousemove',e=>{
+    if(isDragging){
+      camX += (e.clientX-lastMouseX)/camScale;
+      camY += (e.clientY-lastMouseY)/camScale;
+      lastMouseX=e.clientX; lastMouseY=e.clientY;
+    } else {
+      const n = hitTest(e.offsetX,e.offsetY);
+      if(n){ hoveredNode=n.id; showTooltip(e,n); }
+      else { hoveredNode=null; hideTooltip(); }
+    }
+  });
+  canvas.addEventListener('mouseup',()=>{ isDragging=false; });
+  canvas.addEventListener('mouseleave',()=>{ isDragging=false; hoveredNode=null; hideTooltip(); });
+  canvas.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const factor = e.deltaY<0 ? 1.1 : 0.91;
+    const mx=e.offsetX, my=e.offsetY;
+    const wx=mx/camScale-camX, wy=my/camScale-camY;
+    camScale = Math.max(0.15, Math.min(5, camScale*factor));
+    camX=mx/camScale-wx; camY=my/camScale-wy;
+  },{passive:false});
+
+  // 触摸支持
+  let lastTouchDist=0;
+  canvas.addEventListener('touchstart',e=>{
+    if(e.touches.length===1){
+      const t=e.touches[0];
+      const n=hitTest(t.clientX-canvas.getBoundingClientRect().left, t.clientY-canvas.getBoundingClientRect().top);
+      if(!n){ isDragging=true; lastMouseX=t.clientX; lastMouseY=t.clientY; }
+    } else if(e.touches.length===2){
+      lastTouchDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    }
+  },{passive:true});
+  canvas.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    if(e.touches.length===1&&isDragging){
+      const t=e.touches[0];
+      camX+=(t.clientX-lastMouseX)/camScale; camY+=(t.clientY-lastMouseY)/camScale;
+      lastMouseX=t.clientX; lastMouseY=t.clientY;
+    } else if(e.touches.length===2){
+      const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      if(lastTouchDist>0){
+        const factor=d/lastTouchDist;
+        camScale=Math.max(0.15,Math.min(5,camScale*factor));
+      }
+      lastTouchDist=d;
+    }
+  },{passive:false});
+  canvas.addEventListener('touchend',e=>{
+    if(e.changedTouches.length===1&&!isDragging){
+      const t=e.changedTouches[0];
+      const rect=canvas.getBoundingClientRect();
+      const n=hitTest(t.clientX-rect.left,t.clientY-rect.top);
+      if(n) toggleMastery(n.id);
+    }
+    isDragging=false; lastTouchDist=0;
+  },{passive:true});
+
+  document.querySelectorAll('.book-tab').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.book-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      curBookFilter = btn.dataset.book;
+      updateStats();
+      updateDetail();
+    });
+  });
+
+  document.addEventListener('click', e=>{
+    if(!e.target.closest('#move-menu') && !e.target.closest('.move-btn')){
+      closeMoveMenu();
+    }
+  });
+
+  document.addEventListener('keydown', e=>{
+    if(e.key==='Escape'){
+      closeAddStuModal();
+      closeAddGrpModal();
+      closeModal();
+    }
+    if(e.key==='Enter'){
+      if(document.getElementById('add-stu-modal').style.display!=='none' &&
+         document.activeElement===document.getElementById('new-stu-name')){
+        confirmAddStudent();
+      }
+      if(document.getElementById('add-grp-modal').style.display!=='none' &&
+         document.activeElement===document.getElementById('new-grp-name')){
+        confirmAddGroup();
+      }
+    }
+  });
+}
+
+// ================================================================
+// ⑦ Tooltip
+// ================================================================
+function showTooltip(e,n){
+  const u = UNITS.find(u=>u.id===n.unit);
+  document.getElementById('tt-title').textContent = n.name;
+  document.getElementById('tt-id').textContent = n.id;
+  document.getElementById('tt-unit').textContent = (u ? u.book+' · '+u.name : '');
+  document.getElementById('tt-desc').textContent = n.desc;
+  const st = document.getElementById('tt-st');
+  if(isMastered(n.id)){ st.textContent='✅ 已掌握 — 再次点击取消'; st.className='st-ok'; }
+  else { st.textContent='⚪ 点击节点标记为已掌握'; st.className='st-no'; }
+  const tip = document.getElementById('tooltip');
+  tip.style.display='block';
+  let x=e.clientX+16, y=e.clientY-12;
+  if(x+250>window.innerWidth) x=e.clientX-266;
+  if(y+140>window.innerHeight) y=e.clientY-154;
+  tip.style.left=x+'px'; tip.style.top=y+'px';
+}
+function hideTooltip(){ document.getElementById('tooltip').style.display='none'; }
+
+// ================================================================
+// ⑧ 掌握状态切换
+// ================================================================
+function toggleMastery(id){
+  if(!masteredMap[curStudent]) masteredMap[curStudent]=new Set();
+  const wasMastered = masteredMap[curStudent].has(id);
+  if(wasMastered) masteredMap[curStudent].delete(id);
+  else masteredMap[curStudent].add(id);
+  saveData();
+  const nd = NODES.find(n=>n.id===id);
+  logAction('mastery', `${curStudent} ${wasMastered?'取消掌握':'标记掌握'}「${nd?nd.name:id}」(${id})`);
+  updateStats();
+  updateDetail();
+  updateStudentRowProgress(curStudent);
+  // 同步左侧进度条显示
+  const barEl2 = document.getElementById('stu-bar-'+encodeURI(curStudent));
+  const pctEl2 = document.getElementById('stu-pct-'+encodeURI(curStudent));
+  const pct2 = getStudentMasteryPct(curStudent);
+  if(barEl2) barEl2.style.width = pct2+'%';
+  if(pctEl2) pctEl2.textContent = pct2+'%';
+  if(hoveredNode===id){
+    const st = document.getElementById('tt-st');
+    if(isMastered(id)){ st.textContent='✅ 已掌握 — 再次点击取消'; st.className='st-ok'; }
+    else { st.textContent='⚪ 点击节点标记为已掌握'; st.className='st-no'; }
+  }
+}
+
+// ================================================================
+// ⑨ 左侧学生面板
+// ================================================================
+function getStudentMasteryPct(name){
+  const s = masteredMap[name];
+  if(!s) return 0;
+  return Math.round(s.size / NODES.length * 100);
+}
+
+function buildStudentPanel(){
+  const list = document.getElementById('group-list');
+  const totalStu = GROUPS.reduce((s,g)=>s+g.members.length,0);
+  document.getElementById('stu-count-tag').textContent = totalStu+'人 · '+GROUPS.length+'组';
+  let html = '';
+  GROUPS.forEach(g=>{
+    const isOpen = !groupCollapsed[g.id];
+    html += `<div class="grp-block" id="grp-${g.id}"
+      ondragover="onGroupDragOver(event,'${g.id}')"
+      ondrop="onGroupDrop(event,'${g.id}')"
+      ondragleave="onGroupDragLeave(event,'${g.id}')">
+      <div class="grp-hd" onclick="toggleGroup('${g.id}')">
+        <span class="grp-color" style="background:${g.color}"></span>
+        <span class="grp-name-wrap" id="grp-name-${g.id}"
+          ondblclick="event.stopPropagation();editGroupName('${g.id}')">${escHtml(g.name)}</span>
+        <span class="grp-cnt">${g.members.length}人</span>
+        <button class="grp-del-btn" onclick="event.stopPropagation();deleteGroup('${g.id}')" title="删除小组">✕组</button>
+        <span class="grp-arrow ${isOpen?'open':''}" id="grp-arr-${g.id}">▶</span>
+      </div>
+      <div class="grp-body" id="grp-body-${g.id}" style="display:${isOpen?'block':'none'}">
+        ${g.members.map(m=>buildStudentRow(m,g)).join('')}
+      </div>
+    </div>`;
+  });
+  list.innerHTML = html;
+}
+
+function buildStudentRow(name, g){
+  const pct = getStudentMasteryPct(name);
+  const isLeader = name===g.leader;
+  const initial = name.substring(0,2);
+  const isActive = name===curStudent;
+  return `<div class="stu-row${isActive?' active':''}" id="stu-row-${encodeURI(name)}"
+    draggable="true"
+    ondragstart="onStudentDragStart(event,'${escAttr(name)}','${g.id}')"
+    onclick="selectStudent('${escAttr(name)}')"
+    ondragover="event.stopPropagation();"
+  >
+    <div class="stu-avatar" style="background:${g.color}" title="${escHtml(name)}">${escHtml(initial)}</div>
+    <div class="stu-info">
+      <div class="stu-name">
+        <span ondblclick="event.stopPropagation();editStudentName('${escAttr(name)}','${g.id}')">${escHtml(name)}</span>
+        ${isLeader?'<span class="stu-leader" title="组长">👑</span>':''}
+      </div>
+      <div class="stu-progress-wrap">
+        <div class="stu-bar"><div class="stu-bar-fill" id="stu-bar-${encodeURI(name)}" style="width:${pct}%"></div></div>
+        <span class="stu-pct" id="stu-pct-${encodeURI(name)}">${pct}%</span>
+      </div>
+    </div>
+    <div class="stu-actions" onclick="event.stopPropagation()">
+      <button class="stu-act-btn ${isLeader?'leader-on':''}" title="${isLeader?'取消组长':'设为组长'}"
+        onclick="toggleLeader('${escAttr(name)}','${g.id}')">${isLeader?'👑撤':'👑设'}</button>
+      <button class="stu-act-btn" title="移至其他组"
+        onclick="showMoveMenu(event,'${escAttr(name)}','${g.id}')">移组▾</button>
+      <button class="stu-act-btn del" title="删除该学生"
+        onclick="deleteStudent('${escAttr(name)}','${g.id}')">✕</button>
+    </div>
+  </div>`;
+}
+
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s){
+  return String(s).replace(/'/g,"\\'");
+}
+
+function toggleGroup(gid){
+  groupCollapsed[gid] = !groupCollapsed[gid];
+  const body = document.getElementById('grp-body-'+gid);
+  const arr  = document.getElementById('grp-arr-'+gid);
+  if(body){ body.style.display = groupCollapsed[gid] ? 'none' : 'block'; }
+  if(arr){ arr.classList.toggle('open', !groupCollapsed[gid]); }
+}
+
+function selectStudent(name){
+  curStudent = name;
+  document.querySelectorAll('.stu-row').forEach(r=>r.classList.remove('active'));
+  const row = document.getElementById('stu-row-'+encodeURI(name));
+  if(row){ row.classList.add('active'); row.scrollIntoView({block:'nearest',behavior:'smooth'}); }
+  updateStats();
+  updateDetail();
+  updateStudentRowProgress(name);
+}
+
+function updateStudentRowProgress(name){
+  const pct = getStudentMasteryPct(name);
+  const barEl = document.getElementById('stu-bar-'+encodeURI(name));
+  const pctEl = document.getElementById('stu-pct-'+encodeURI(name));
+  if(barEl) barEl.style.width = pct+'%';
+  if(pctEl) pctEl.textContent = pct+'%';
+}
+
+function updateAllStudentProgress(){
+  getAllStudents().forEach(name => updateStudentRowProgress(name));
+}
+
+function filterStudents(query){
+  const q = query.trim().toLowerCase();
+  GROUPS.forEach(g=>{
+    let groupVisible = false;
+    g.members.forEach(name=>{
+      const row = document.getElementById('stu-row-'+encodeURI(name));
+      if(!row) return;
+      const show = !q || name.toLowerCase().includes(q);
+      row.style.display = show ? '' : 'none';
+      if(show) groupVisible = true;
+    });
+    if(q && groupVisible && groupCollapsed[g.id]){
+      toggleGroup(g.id);
+    }
+  });
+}
+
+function toggleLeader(name, gid){
+  const g = GROUPS.find(x=>x.id===gid);
+  if(!g) return;
+  if(g.leader===name){
+    if(!confirm(`确定取消 ${name} 的组长身份吗？`)) return;
+    g.leader = '';
+    logAction('group', `取消「${name}」的组长身份（${g.name}）`);
+  } else {
+    const old = g.leader;
+    g.leader = name;
+    logAction('group', `设置「${name}」为「${g.name}」组长${old?'（替换'+old+'）':''}`);
+  }
+  saveGroups();
+  buildStudentPanel();
+  updateDetail();
+}
+
+function addStudentDialog(){
+  const sel = document.getElementById('new-stu-group');
+  sel.innerHTML = GROUPS.map(g=>`<option value="${g.id}">${escHtml(g.name)}</option>`).join('');
+  document.getElementById('new-stu-name').value = '';
+  const modal = document.getElementById('add-stu-modal');
+  modal.style.display='flex';
+  setTimeout(()=>document.getElementById('new-stu-name').focus(),80);
+}
+function closeAddStuModal(){
+  document.getElementById('add-stu-modal').style.display='none';
+}
+function confirmAddStudent(){
+  const name = document.getElementById('new-stu-name').value.trim();
+  if(!name){ alert('请输入学生姓名！'); return; }
+  if(getAllStudents().includes(name)){ alert(`学生「${name}」已存在！`); return; }
+  const gid = document.getElementById('new-stu-group').value;
+  const targetG = GROUPS.find(g=>g.id===gid);
+  if(!targetG){ alert('小组不存在！'); return; }
+  targetG.members.push(name);
+  masteredMap[name] = new Set();
+  logAction('student', `新增学生「${name}」到「${targetG.name}」`);
+  saveGroups(); saveData();
+  closeAddStuModal();
+  buildStudentPanel();
+  selectStudent(name);
+}
+
+function deleteStudent(name, gid){
+  if(!confirm(`确定删除学生「${name}」及其所有掌握数据吗？\n此操作不可恢复！`)) return;
+  logAction('student', `删除学生「${name}」`);
+  const g = GROUPS.find(x=>x.id===gid);
+  if(!g) return;
+  const idx = g.members.indexOf(name);
+  if(idx>=0) g.members.splice(idx,1);
+  if(g.leader===name) g.leader = g.members[0]||'';
+  delete masteredMap[name];
+  if(curStudent===name){
+    const first = getAllStudents()[0];
+    curStudent = first||'';
+  }
+  saveGroups(); saveData();
+  buildStudentPanel();
+  if(curStudent) { updateStats(); updateDetail(); }
+}
+
+const GRP_PALETTE=['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6',
+  '#1abc9c','#e67e22','#e91e63','#00bcd4','#8bc34a','#ff5722','#607d8b',
+  '#795548','#009688','#673ab7','#ff6b6b','#a29bfe','#fd79a8','#00b894','#6c5ce7'];
+let pendingGrpColor = '';
+function addGroupDialog(){
+  document.getElementById('new-grp-name').value = '';
+  const usedColors = GROUPS.map(g=>g.color);
+  const freeColors = GRP_PALETTE.filter(c=>!usedColors.includes(c));
+  pendingGrpColor = freeColors[0] || GRP_PALETTE[GROUPS.length % GRP_PALETTE.length];
+  const picker = document.getElementById('color-picker');
+  picker.innerHTML = GRP_PALETTE.map(c=>{
+    const sel = c===pendingGrpColor;
+    return `<div onclick="pendingGrpColor='${c}';document.querySelectorAll('.cp-dot').forEach(d=>d.style.outline='none');this.querySelector('.cp-dot').style.outline='2px solid #fff';" style="cursor:pointer;">
+      <div class="cp-dot" style="width:22px;height:22px;border-radius:50%;background:${c};outline:${sel?'2px solid #fff':'none'};outline-offset:2px;"></div>
+    </div>`;
+  }).join('');
+  const modal = document.getElementById('add-grp-modal');
+  modal.style.display='flex';
+  setTimeout(()=>document.getElementById('new-grp-name').focus(),80);
+}
+function closeAddGrpModal(){
+  document.getElementById('add-grp-modal').style.display='none';
+}
+function confirmAddGroup(){
+  const name = document.getElementById('new-grp-name').value.trim();
+  if(!name){ alert('请输入小组名称！'); return; }
+  if(GROUPS.find(g=>g.name===name)){ alert(`小组「${name}」已存在！`); return; }
+  const maxId = GROUPS.reduce((mx,g)=>Math.max(mx,parseInt(g.id.replace('G',''))||0),0);
+  const newId = 'G'+(maxId+1);
+  GROUPS.push({id:newId, name, color:pendingGrpColor, leader:'', members:[]});
+  saveGroups();
+  closeAddGrpModal();
+  buildStudentPanel();
+}
+
+function deleteGroup(gid){
+  const g = GROUPS.find(x=>x.id===gid);
+  if(!g) return;
+  if(g.members.length>0){
+    const choice = confirm(
+      `小组「${g.name}」还有 ${g.members.length} 名学生。\n\n点「确定」将该组学生移至第一组，点「取消」放弃删除。`
+    );
+    if(!choice) return;
+    const target = GROUPS.find(x=>x.id!==gid);
+    if(target) g.members.forEach(m=>target.members.push(m));
+  } else {
+    if(!confirm(`确定删除空小组「${g.name}」吗？`)) return;
+  }
+  logAction('group', `删除小组「${g.name}」`);
+  const gIdx = GROUPS.findIndex(x=>x.id===gid);
+  GROUPS.splice(gIdx,1);
+  if(!GROUPS.length){ alert('不能删除所有小组！'); return; }
+  saveGroups();
+  buildStudentPanel();
+  const allStu = getAllStudents();
+  if(!allStu.includes(curStudent)){
+    curStudent = allStu[0]||'';
+    if(curStudent){ updateStats(); updateDetail(); }
+  }
+}
+
+function editGroupName(gid){
+  const el = document.getElementById('grp-name-'+gid);
+  if(!el || el.querySelector('input')) return;
+  const g = GROUPS.find(x=>x.id===gid);
+  const oldName = g.name;
+  const input = document.createElement('input');
+  input.className = 'grp-name-input';
+  input.value = oldName;
+  el.innerHTML = '';
+  el.appendChild(input);
+  input.focus(); input.select();
+  const save = ()=>{
+    const newName = input.value.trim() || oldName;
+    if(newName !== oldName) logAction('group', `重命名小组「${oldName}」→「${newName}」`);
+    g.name = newName;
+    el.textContent = newName;
+    saveGroups();
+  };
+  input.onblur = save;
+  input.onkeydown = e=>{ if(e.key==='Enter') { save(); input.blur(); } if(e.key==='Escape') { el.textContent=oldName; } };
+}
+
+function editStudentName(oldName, gid){
+  const row = document.getElementById('stu-row-'+encodeURI(oldName));
+  if(!row) return;
+  const nameSpan = row.querySelector('.stu-name>span');
+  if(!nameSpan || nameSpan.querySelector('input')) return;
+  const input = document.createElement('input');
+  input.className = 'stu-name-input';
+  input.value = oldName;
+  nameSpan.innerHTML = '';
+  nameSpan.appendChild(input);
+  input.focus(); input.select();
+  const save = ()=>{
+    const newName = input.value.trim() || oldName;
+    if(newName !== oldName){
+      const g = GROUPS.find(x=>x.id===gid);
+      const idx = g.members.indexOf(oldName);
+      if(idx>=0) g.members[idx] = newName;
+      if(g.leader === oldName) g.leader = newName;
+      masteredMap[newName] = masteredMap[oldName] || new Set();
+      delete masteredMap[oldName];
+      if(curStudent === oldName) curStudent = newName;
+      saveGroups(); saveData();
+      buildStudentPanel();
+      updateStats(); updateDetail();
+    } else {
+      nameSpan.textContent = oldName;
+    }
+  };
+  input.onblur = save;
+  input.onkeydown = e=>{ if(e.key==='Enter') { save(); } if(e.key==='Escape') { nameSpan.textContent=oldName; } };
+}
+
+function showMoveMenu(evt, name, fromGid){
+  const menu = document.getElementById('move-menu');
+  let html = '';
+  GROUPS.forEach(g=>{
+    if(g.id===fromGid) return;
+    html += `<div class="move-menu-item" onclick="moveStudentToGroup('${escAttr(name)}','${fromGid}','${g.id}')">
+      <span class="move-menu-dot" style="background:${g.color}"></span>移至 ${escHtml(g.name)}
+    </div>`;
+  });
+  menu.innerHTML = html;
+  menu.style.display = 'block';
+  let x=evt.clientX, y=evt.clientY+4;
+  if(x+140>window.innerWidth) x=window.innerWidth-145;
+  if(y+GROUPS.length*32>window.innerHeight) y=evt.clientY-GROUPS.length*32;
+  menu.style.left=x+'px'; menu.style.top=y+'px';
+  openMoveMenu = menu;
+}
+function closeMoveMenu(){
+  document.getElementById('move-menu').style.display='none';
+  openMoveMenu=null;
+}
+
+function moveStudentToGroup(name, fromGid, toGid){
+  const fromG = GROUPS.find(g=>g.id===fromGid);
+  const toG   = GROUPS.find(g=>g.id===toGid);
+  if(!fromG||!toG) return;
+  const idx = fromG.members.indexOf(name);
+  if(idx<0) return;
+  fromG.members.splice(idx,1);
+  toG.members.push(name);
+  if(!masteredMap[name]) masteredMap[name]=new Set();
+  logAction('group', `将「${name}」从「${fromG.name}」移至「${toG.name}」`);
+  saveGroups();
+  buildStudentPanel();
+  closeMoveMenu();
+  if(curStudent===name) selectStudent(name);
+}
+
+function onStudentDragStart(evt, name, gid){
+  dragSrcStudent = name;
+  dragSrcGid = gid;
+  evt.dataTransfer.effectAllowed = 'move';
+  evt.dataTransfer.setData('text/plain', name);
+}
+function onGroupDragOver(evt, gid){
+  evt.preventDefault();
+  evt.dataTransfer.dropEffect = 'move';
+  document.getElementById('grp-'+gid)?.querySelector('.grp-hd')?.classList.add('drag-over');
+}
+function onGroupDragLeave(evt, gid){
+  document.getElementById('grp-'+gid)?.querySelector('.grp-hd')?.classList.remove('drag-over');
+}
+function onGroupDrop(evt, toGid){
+  evt.preventDefault();
+  document.getElementById('grp-'+toGid)?.querySelector('.grp-hd')?.classList.remove('drag-over');
+  if(!dragSrcStudent || dragSrcGid===toGid) return;
+  moveStudentToGroup(dragSrcStudent, dragSrcGid, toGid);
+  dragSrcStudent=null; dragSrcGid=null;
+}
+
+// ================================================================
+// ⑩ 顶部统计 & 右侧面板
+// ================================================================
+function filteredNodes(){
+  if(curBookFilter==='all') return NODES;
+  return NODES.filter(n=>{
+    const u = UNITS.find(u=>u.id===n.unit);
+    return u && u.book===curBookFilter;
+  });
+}
+
+function updateStats(){
+  const visNodes = filteredNodes();
+  const total = visNodes.length;
+  const m = visNodes.filter(n=>isMastered(n.id)).length;
+  const pct = total>0 ? Math.round(m/total*100) : 0;
+  document.getElementById('st-m').textContent = m;
+  document.getElementById('st-t').textContent = total;
+  document.getElementById('st-p').textContent = pct+'%';
+}
+
+function updateDetail(){
+  document.getElementById('dp-stu-name').textContent = curStudent;
+  const g = getStudentGroup(curStudent);
+  if(g){
+    document.getElementById('dp-grp-dot').style.background = g.color;
+    const isLeader = g.leader===curStudent;
+    document.getElementById('dp-grp-nm').textContent = g.name + (isLeader?' · 组长':'');
+  }
+  const visNodes = filteredNodes();
+  const total = visNodes.length;
+  const m = visNodes.filter(n=>isMastered(n.id)).length;
+  const pct = total>0 ? Math.round(m/total*100) : 0;
+  document.getElementById('dp-pct').textContent = pct+'%';
+  document.getElementById('dp-bar').style.width = pct+'%';
+  const pbSpan = document.querySelector('#detail .pb-row span:first-child');
+  if(pbSpan) pbSpan.textContent = (curBookFilter==='all'?'全册':curBookFilter)+'掌握进度';
+
+  const visUnits = curBookFilter==='all' ? UNITS : UNITS.filter(u=>u.book===curBookFilter);
+  let html = '';
+  visUnits.forEach(u=>{
+    const uNodes = NODES.filter(n=>n.unit===u.id);
+    const um = uNodes.filter(n=>isMastered(n.id)).length;
+    const up = uNodes.length>0 ? Math.round(um/uNodes.length*100) : 0;
+    const isOpen = !!unitDetailOpen[u.id];
+    html += `<div class="unit-blk">
+      <div class="unit-hd" onclick="toggleUnitDetail('${u.id}')">
+        <span class="unit-dot" style="background:${u.color}"></span>
+        <span class="unit-nm">${escHtml(u.name)}</span>
+        <span class="unit-stat">${um}/${uNodes.length}(${up}%)</span>
+        <span class="unit-arr ${isOpen?'open':''}" id="ua-${u.id}">▶</span>
+      </div>
+      <div class="unit-body" id="ub-${u.id}" style="display:${isOpen?'block':'none'}">
+        ${uNodes.map(n=>{
+          const ok = isMastered(n.id);
+          return `<div class="kp-item${ok?' mastered':''}" onclick="toggleMastery('${n.id}')">
+            <span class="kp-dot" style="background:${ok?'#2ecc71':'#3a3f55'};border:1px solid ${u.color}40"></span>
+            <span class="kp-txt">${ok?'✓':' '} ${escHtml(n.id)} ${escHtml(n.name)}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+  document.getElementById('dp-units').innerHTML = html;
+}
+
+function toggleUnitDetail(uid){
+  unitDetailOpen[uid] = !unitDetailOpen[uid];
+  const body = document.getElementById('ub-'+uid);
+  const arr  = document.getElementById('ua-'+uid);
+  if(body) body.style.display = unitDetailOpen[uid] ? 'block' : 'none';
+  if(arr)  arr.classList.toggle('open', unitDetailOpen[uid]);
+}
+
+// ================================================================
+// ⑪ 导出 Excel（与导入模板格式一致）
+// ================================================================
+function exportExcel(){
+  // 动态加载 SheetJS
+  if(typeof XLSX !== 'undefined'){
+    _doExportExcel(); return;
+  }
+  const cdnList = [
+    'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+    'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js'
+  ];
+  let tryIdx=0;
+  function tryNext(){
+    if(tryIdx>=cdnList.length){ alert('⚠️ Excel库加载失败，请检查网络连接后重试。'); return; }
+    const s=document.createElement('script');
+    s.src=cdnList[tryIdx++];
+    s.onload=()=>_doExportExcel();
+    s.onerror=()=>tryNext();
+    document.head.appendChild(s);
+  }
+  tryNext();
+}
+
+function _doExportExcel(){
+  // 上册知识点（K01–K35）
+  const upperNodes = NODES.filter(n=>{ const u=UNITS.find(u=>u.id===n.unit); return u&&u.book==='上册'; });
+  const lowerNodes = NODES.filter(n=>{ const u=UNITS.find(u=>u.id===n.unit); return u&&u.book==='下册'; });
+
+  // 表头行
+  const header = ['序号','学生姓名','组名','角色',
+    '掌握知识点数（上册）','掌握率（上册）',
+    '掌握知识点数（下册）','掌握率（下册）',
+    ...NODES.map(n=>n.id)
+  ];
+
+  const rows = [header];
+  let seq = 1;
+  GROUPS.forEach(g=>{
+    g.members.forEach(name=>{
+      const ms = masteredMap[name] || new Set();
+      const upperM = upperNodes.filter(n=>ms.has(n.id)).length;
+      const lowerM = lowerNodes.filter(n=>ms.has(n.id)).length;
+      const upperRate = upperNodes.length>0 ? (upperM/upperNodes.length).toFixed(4) : 0;
+      const lowerRate = lowerNodes.length>0 ? (lowerM/lowerNodes.length).toFixed(4) : 0;
+      const isLeader = name===g.leader ? '组长' : '组员';
+      const row = [
+        seq++, name, g.name, isLeader,
+        upperM, parseFloat(upperRate),
+        lowerM, parseFloat(lowerRate),
+        ...NODES.map(n=>ms.has(n.id)?1:0)
+      ];
+      rows.push(row);
+    });
+  });
+
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  // 设置列宽
+  ws['!cols'] = [
+    {wch:6},{wch:10},{wch:10},{wch:6},
+    {wch:16},{wch:12},{wch:16},{wch:12},
+    ...NODES.map(()=>({wch:5}))
+  ];
+  const wb = XLSX.utils.book_new();
+  const today = new Date();
+  const dateStr = `${today.getFullYear()}_${String(today.getMonth()+1).padStart(2,'0')}_${String(today.getDate()).padStart(2,'0')}`;
+  const sheetName = `全班学生数学知识掌握情况_${dateStr}`;
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  XLSX.writeFile(wb, `五年级数学知识掌握_${dateStr}.xlsx`);
+  logAction('export', `导出Excel：${getAllStudents().length}名学生，${dateStr}`);
+}
+
+// ================================================================
+// ⑫ 导入 Excel
+// ================================================================
+function showImport(){
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+}
+
+function handleXLSXImport(input){
+  const file = input.files[0];
+  if(!file) return;
+  input.value='';
+  const nameEl = document.getElementById('xlsx-file-name');
+  nameEl.textContent = '⏳ 正在加载解析库...';
+  nameEl.style.color='#7eb8ff';
+
+  function processFile(){
+    const reader = new FileReader();
+    reader.onload = e=>{
+      try{
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, {type:'array', codepage:65001});
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(sheet, {header:1, defval:''});
+        if(!jsonData.length){ nameEl.textContent='❌ 文件为空'; nameEl.style.color='#ff8888'; return; }
+        _importFromRows(jsonData, file.name, sheetName, nameEl);
+      }catch(err){
+        nameEl.textContent='❌ 解析失败：'+err.message;
+        nameEl.style.color='#ff8888';
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  if(typeof XLSX !== 'undefined'){
+    processFile(); return;
+  }
+  const cdnList=[
+    'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+    'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js'
+  ];
+  let tryIdx=0;
+  function tryNext(){
+    if(tryIdx>=cdnList.length){
+      nameEl.textContent='❌ 无法加载解析库（请检查网络）';
+      nameEl.style.color='#ff8888';
+      return;
+    }
+    const s=document.createElement('script');
+    s.src=cdnList[tryIdx++];
+    s.onload=()=>{ nameEl.style.color='#7eb8ff'; processFile(); };
+    s.onerror=()=>tryNext();
+    document.head.appendChild(s);
+  }
+  tryNext();
+}
+
+function _importFromRows(rows, fileName, sheetName, nameEl){
+  if(rows.length<2){ nameEl.textContent='❌ 数据行为空'; nameEl.style.color='#ff8888'; return; }
+  const header = rows[0].map(h=>String(h).trim());
+
+  // 找各列索引
+  const colName = header.findIndex(h=>h==='学生姓名'||h.includes('姓名'));
+  const colGroup = header.findIndex(h=>h==='组名'||h.includes('组名'));
+  const colRole = header.findIndex(h=>h==='角色'||h.includes('角色'));
+
+  if(colName<0){
+    nameEl.textContent='❌ 未找到「学生姓名」列，请检查文件格式';
+    nameEl.style.color='#ff8888';
+    return;
+  }
+
+  // 找K01–K64列索引
+  const kColMap = {};
+  NODES.forEach(n=>{
+    const idx = header.findIndex(h=>h===n.id);
+    if(idx>=0) kColMap[n.id] = idx;
+  });
+
+  let importedCount=0, changedCount=0, notFoundStudents=[];
+  const allStudents = getAllStudents();
+
+  for(let i=1;i<rows.length;i++){
+    const row = rows[i];
+    if(!row || row.every(c=>c===''||c===null||c===undefined)) continue;
+    const name = String(row[colName]||'').trim();
+    if(!name) continue;
+
+    if(!allStudents.includes(name)){
+      notFoundStudents.push(name);
+      continue;
+    }
+
+    const oldSet = new Set(masteredMap[name]||[]);
+    const newSet = new Set();
+
+    NODES.forEach(n=>{
+      const idx = kColMap[n.id];
+      if(idx===undefined) return;
+      const val = String(row[idx]||'').trim();
+      if(val==='1'||val.toLowerCase()==='true'||val==='是'||val.toLowerCase()==='yes'){
+        newSet.add(n.id);
+      }
+    });
+
+    // 计算变化
+    for(const id of newSet){ if(!oldSet.has(id)) changedCount++; }
+    for(const id of oldSet){ if(!newSet.has(id)) changedCount++; }
+
+    masteredMap[name] = newSet;
+    importedCount++;
+
+    // 更新组信息
+    if(colGroup>=0 && colRole>=0){
+      const groupName = String(row[colGroup]||'').trim();
+      const role = String(row[colRole]||'').trim();
+      if(groupName){
+        // 如果组名不同，尝试移动学生
+        const curG = getStudentGroup(name);
+        if(curG && curG.name !== groupName){
+          const targetG = GROUPS.find(g=>g.name===groupName);
+          if(targetG){
+            const idx2 = curG.members.indexOf(name);
+            if(idx2>=0) curG.members.splice(idx2,1);
+            targetG.members.push(name);
+          }
+        }
+        // 更新组长
+        const finalG = getStudentGroup(name);
+        if(finalG && (role==='组长'||role==='leader')){
+          finalG.leader = name;
+        }
+      }
+    }
+  }
+
+  saveData();
+  saveGroups();
+  buildStudentPanel();
+  updateStats(); updateDetail();
+
+  nameEl.textContent = `✅ ${fileName}（${sheetName}）`;
+  nameEl.style.color='#2ecc71';
+
+  let msg = `✅ 导入完成！\n共更新 ${importedCount} 名学生的掌握状态\n本次共改变 ${changedCount} 条记录`;
+  if(notFoundStudents.length>0){
+    msg += `\n\n⚠️ 以下 ${notFoundStudents.length} 名学生在系统中不存在，已跳过：\n${notFoundStudents.slice(0,10).join('、')}${notFoundStudents.length>10?'…':''}`;
+  }
+  logAction('import', `Excel导入：${importedCount}名学生，改变${changedCount}条（${fileName}）`);
+  alert(msg);
+  closeModal();
+}
+
+// ================================================================
+// ⑬ 重置
+// ================================================================
+function resetCurrent(){
+  if(!confirm(`确定清除 ${curStudent} 的所有掌握记录吗？`)) return;
+  logAction('reset', `清除「${curStudent}」的全部掌握记录`);
+  masteredMap[curStudent]=new Set();
+  saveData();
+  updateStats(); updateDetail();
+  updateStudentRowProgress(curStudent);
+}
+
+// ================================================================
+// ⑭ 画布初始化
+// ================================================================
+function resizeCanvas(){
+  const wrap = document.getElementById('canvas-wrap');
+  W = wrap.clientWidth;
+  H = wrap.clientHeight;
+  if(W<=0) W = window.innerWidth-540;
+  if(H<=0) H = window.innerHeight-60;
+  canvas.width  = W;
+  canvas.height = H;
+}
+
+function initCamera(){
+  const scaleX = W/VIRT_W;
+  const scaleY = H/VIRT_H;
+  camScale = Math.min(scaleX,scaleY)*0.88;
+  const vw = VIRT_W*camScale;
+  const vh = VIRT_H*camScale;
+  camX = (W-vw)/2/camScale;
+  camY = (H-vh)/2/camScale;
+}
+
+// ================================================================
+// ⑮ 启动
+// ================================================================
+window.addEventListener('DOMContentLoaded',()=>{
+  // 初始化班级管理（必须先于其他操作）
+  loadClasses();
+  loadCurrentClassData();
+  loadLog();
+  buildStudentPanel();
+
+  canvas = document.getElementById('c');
+  ctx = canvas.getContext('2d');
+
+  setTimeout(()=>{
+    resizeCanvas();
+    initCamera();
+    initNodes();
+    initEvents();
+    updateStats();
+    updateDetail();
+    loop();
+    // 默认选中第一个学生
+    const firstStu = GROUPS[0]?.members[0];
+    curStudent = firstStu || '';
+    if(firstStu) selectStudent(firstStu);
+    // 刷新班级选择器
+    updateClassSelect();
+    // 刷新全部学生进度条（确保 localStorage数据正确显示）
+    updateAllStudentProgress();
+  }, 80);
+});
+
+window.addEventListener('resize',()=>{
+  resizeCanvas();
+  initCamera();
+});
+
+// ================================================================
+// ⑯ 操作日志
+// ================================================================
+let actionLog = [];
+
+function loadLog(){
+  try{
+    const raw = localStorage.getItem(LS_LOG);
+    if(raw) actionLog = JSON.parse(raw);
+  }catch(e){ actionLog = []; }
+}
+
+function saveLog(){
+  if(actionLog.length > 300) actionLog = actionLog.slice(-300);
+  localStorage.setItem(LS_LOG, JSON.stringify(actionLog));
+}
+
+function logAction(tag, content){
+  const now = new Date();
+  const pad = n=>String(n).padStart(2,'0');
+  const timeStr = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  actionLog.push({ time: timeStr, tag, content });
+  saveLog();
+}
+
+const LOG_TAG_MAP = {
+  mastery: '掌握',
+  import:  '导入',
+  export:  '导出',
+  group:   '分组',
+  student: '学生',
+  reset:   '重置',
+  class:   '班级',
+};
+
+function renderLogItems(items){
+  const list = document.getElementById('log-list');
+  const empty = document.getElementById('log-empty');
+  const noResult = document.getElementById('log-no-result');
+  if(!actionLog.length){
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    noResult.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  if(!items.length){
+    list.innerHTML = '';
+    noResult.style.display = 'block';
+    return;
+  }
+  noResult.style.display = 'none';
+  list.innerHTML = items.map(item=>{
+    const tagClass = 'log-tag-' + (item.tag||'mastery');
+    const tagLabel = LOG_TAG_MAP[item.tag] || item.tag;
+    return `<div class="log-item">
+      <span class="log-time">${escHtml(item.time)}</span>
+      <span class="log-content"><span class="log-tag ${tagClass}">${escHtml(tagLabel)}</span>${escHtml(item.content)}</span>
+    </div>`;
+  }).join('');
+}
+
+function showLog(){
+  loadLog();
+  // 打开时清空搜索框
+  const searchEl = document.getElementById('log-search');
+  if(searchEl) searchEl.value = '';
+  renderLogItems([...actionLog].reverse());
+  document.getElementById('log-modal').classList.add('show');
+  // 自动聚焦搜索框
+  if(searchEl) setTimeout(()=>searchEl.focus(), 50);
+}
+
+function filterLog(){
+  const kw = (document.getElementById('log-search')?.value || '').trim().toLowerCase();
+  const reversed = [...actionLog].reverse();
+  if(!kw){ renderLogItems(reversed); return; }
+  const filtered = reversed.filter(item=>{
+    const tagLabel = (LOG_TAG_MAP[item.tag] || item.tag || '').toLowerCase();
+    return (item.time||'').toLowerCase().includes(kw)
+        || (item.content||'').toLowerCase().includes(kw)
+        || tagLabel.includes(kw);
+  });
+  renderLogItems(filtered);
+}
+
+function closeLog(){
+  document.getElementById('log-modal').classList.remove('show');
+}
+
+function clearLog(){
+  if(!confirm('确定清空所有操作日志吗？')) return;
+  actionLog = [];
+  saveLog();
+  showLog();
+}
+
+</script>
+</body>
+</html>
