@@ -76,6 +76,7 @@ body{font-family:"PingFang SC","Microsoft YaHei",sans-serif;background:#1a1d2e;c
 .stu-row:hover .stu-actions{display:flex;}
 .stu-act-btn{padding:2px 5px;border-radius:3px;border:1px solid #3a4060;background:#252a45;color:#8899cc;font-size:0.58rem;cursor:pointer;white-space:nowrap;}
 .stu-act-btn.leader-on{border-color:#665500;background:#3a3010;color:#ffcc44;}
+.stu-act-btn.city-on{border-color:#004466;background:#102030;color:#44ccff;}
 .stu-act-btn.del{border-color:#663333;background:#3a2020;color:#ff7777;}
 .move-btn{padding:2px 5px;border-radius:3px;border:1px solid #3a4060;background:#252a45;color:#8899cc;font-size:0.6rem;cursor:pointer;display:none;flex-shrink:0;}
 .stu-row:hover .move-btn{display:block;}
@@ -321,7 +322,7 @@ canvas{display:block;}
       <strong style="color:#aaa;">📋 格式说明：</strong><br>
       • 第1行为表头，至少包含「<strong style="color:#7eb8ff;">学生姓名</strong>」列<br>
       • 「<strong style="color:#7eb8ff;">组名</strong>」列：填写小组名称，不填则放入「待分组」<br>
-      • 「<strong style="color:#7eb8ff;">角色</strong>」列：填写「组长」可设置该学生为组长<br>
+      • 「<strong style="color:#7eb8ff;">角色</strong>」列：填写「组长」或「城主」可设置对应角色，不填则为组员<br>
       • 文件中出现的新小组名称将自动创建<br>
       • <strong style="color:#ffdd88;">覆盖模式</strong>将清除当前班级所有学生和分组数据，请谨慎使用
     </div>
@@ -572,7 +573,7 @@ let curClassId = '';
 // 默认初始班级数据
 const DEFAULT_CLASS_NAME = '5.1班';
 const DEFAULT_GROUPS = [
-  {id:"G1",name:"待分组",color:"#7eb8ff",leader:"",
+  {id:"G1",name:"待分组",color:"#7eb8ff",leader:"",cityMaster:"",
    members:["曹意欣","曾思弦","曾艺","陈霁谦","陈司翰","陈逸轩","陈语萱","陈子淇",
             "程熙耀","邓槿贤","段荌荌","段钧瑞","范修齐","韩可鑫","何子墨","胡峻熙",
             "黎钰涵","李嘉羿","李彦羲","刘睿辰","刘颖","马天灏","马伟杰","牟鑫蕊",
@@ -676,7 +677,7 @@ function addClass(){
   CLASSES.push({id: cid, name: trimmed});
   saveClassList();
   // 新班级初始化一个空的待分组
-  const emptyGroups = [{id:'G1',name:'待分组',color:'#7eb8ff',leader:'',members:[]}];
+  const emptyGroups = [{id:'G1',name:'待分组',color:'#7eb8ff',leader:'',cityMaster:'',members:[]}];
   localStorage.setItem(lsKeyGrp(cid), JSON.stringify(emptyGroups));
   logAction('class', '新增班级「'+trimmed+'」');
   switchClass(cid);
@@ -1177,6 +1178,7 @@ function buildStudentPanel(){
 function buildStudentRow(name, g){
   const pct = getStudentMasteryPct(name);
   const isLeader = name===g.leader;
+  const isCityMaster = name===(g.cityMaster||'');
   const initial = name.substring(0,2);
   const isActive = name===curStudent;
   return `<div class="stu-row${isActive?' active':''}" id="stu-row-${encodeURI(name)}"
@@ -1190,6 +1192,7 @@ function buildStudentRow(name, g){
       <div class="stu-name">
         <span ondblclick="event.stopPropagation();editStudentName('${escAttr(name)}','${g.id}')">${escHtml(name)}</span>
         ${isLeader?'<span class="stu-leader" title="组长">👑</span>':''}
+        ${isCityMaster?'<span class="stu-leader" title="城主">🏰</span>':''}
       </div>
       <div class="stu-progress-wrap">
         <div class="stu-bar"><div class="stu-bar-fill" id="stu-bar-${encodeURI(name)}" style="width:${pct}%"></div></div>
@@ -1199,6 +1202,8 @@ function buildStudentRow(name, g){
     <div class="stu-actions" onclick="event.stopPropagation()">
       <button class="stu-act-btn ${isLeader?'leader-on':''}" title="${isLeader?'取消组长':'设为组长'}"
         onclick="toggleLeader('${escAttr(name)}','${g.id}')">${isLeader?'👑撤':'👑设'}</button>
+      <button class="stu-act-btn ${isCityMaster?'city-on':''}" title="${isCityMaster?'取消城主':'设为城主'}"
+        onclick="toggleCityMaster('${escAttr(name)}','${g.id}')">${isCityMaster?'🏰撤':'🏰设'}</button>
       <button class="stu-act-btn" title="移至其他组"
         onclick="showMoveMenu(event,'${escAttr(name)}','${g.id}')">移组▾</button>
       <button class="stu-act-btn del" title="删除该学生"
@@ -1263,8 +1268,7 @@ function filterStudents(query){
 
 function toggleLeader(name, gid){
   const g = GROUPS.find(x=>x.id===gid);
-  if(!g) return;
-  if(g.leader===name){
+  if(!g) return;  if(g.leader===name){
     if(!confirm(`确定取消 ${name} 的组长身份吗？`)) return;
     g.leader = '';
     logAction('group', `取消「${name}」的组长身份（${g.name}）`);
@@ -1275,7 +1279,22 @@ function toggleLeader(name, gid){
   }
   saveGroups();
   buildStudentPanel();
-  updateDetail();
+}
+function toggleCityMaster(name, gid){
+  const g = GROUPS.find(x=>x.id===gid);
+  if(!g) return;
+  if(!g.cityMaster) g.cityMaster = '';
+  if(g.cityMaster===name){
+    if(!confirm(`确定取消 ${name} 的城主身份吗？`)) return;
+    g.cityMaster = '';
+    logAction('group', `取消「${name}」的城主身份（${g.name}）`);
+  } else {
+    const old = g.cityMaster;
+    g.cityMaster = name;
+    logAction('group', `设置「${name}」为「${g.name}」城主${old?'（替换'+old+'）':''}`);
+  }
+  saveGroups();
+  buildStudentPanel();
 }
 
 function addStudentDialog(){
@@ -1313,6 +1332,7 @@ function deleteStudent(name, gid){
   const idx = g.members.indexOf(name);
   if(idx>=0) g.members.splice(idx,1);
   if(g.leader===name) g.leader = g.members[0]||'';
+  if((g.cityMaster||'')===name) g.cityMaster = '';
   delete masteredMap[name];
   if(curStudent===name){
     const first = getAllStudents()[0];
@@ -1352,7 +1372,7 @@ function confirmAddGroup(){
   if(GROUPS.find(g=>g.name===name)){ alert(`小组「${name}」已存在！`); return; }
   const maxId = GROUPS.reduce((mx,g)=>Math.max(mx,parseInt(g.id.replace('G',''))||0),0);
   const newId = 'G'+(maxId+1);
-  GROUPS.push({id:newId, name, color:pendingGrpColor, leader:'', members:[]});
+  GROUPS.push({id:newId, name, color:pendingGrpColor, leader:'', cityMaster:'', members:[]});
   saveGroups();
   closeAddGrpModal();
   buildStudentPanel();
@@ -1424,6 +1444,7 @@ function editStudentName(oldName, gid){
       const idx = g.members.indexOf(oldName);
       if(idx>=0) g.members[idx] = newName;
       if(g.leader === oldName) g.leader = newName;
+      if((g.cityMaster||'') === oldName) g.cityMaster = newName;
       masteredMap[newName] = masteredMap[oldName] || new Set();
       delete masteredMap[oldName];
       if(curStudent === oldName) curStudent = newName;
@@ -1525,7 +1546,9 @@ function updateDetail(){
   if(g){
     document.getElementById('dp-grp-dot').style.background = g.color;
     const isLeader = g.leader===curStudent;
-    document.getElementById('dp-grp-nm').textContent = g.name + (isLeader?' · 组长':'');
+    const isCityMaster = (g.cityMaster||'')===curStudent;
+    let roleLabel = isLeader?' · 组长' : (isCityMaster?' · 城主':'');
+    document.getElementById('dp-grp-nm').textContent = g.name + roleLabel;
   }
   const visNodes = filteredNodes();
   const total = visNodes.length;
@@ -1618,7 +1641,7 @@ function _doExportExcel(){
       const lowerM = lowerNodes.filter(n=>ms.has(n.id)).length;
       const upperRate = upperNodes.length>0 ? (upperM/upperNodes.length).toFixed(4) : 0;
       const lowerRate = lowerNodes.length>0 ? (lowerM/lowerNodes.length).toFixed(4) : 0;
-      const isLeader = name===g.leader ? '组长' : '组员';
+      const isLeader = name===g.leader ? '组长' : ((name===(g.cityMaster||'')) ? '城主' : '组员');
       const row = [
         seq++, name, g.name, isLeader,
         upperM, parseFloat(upperRate),
@@ -1781,6 +1804,10 @@ function _importFromRows(rows, fileName, sheetName, nameEl){
         if(finalG && (role==='组长'||role==='leader')){
           finalG.leader = name;
         }
+        if(finalG && (role==='城主'||role==='citymaster'||role==='city_master')){
+          if(!finalG.cityMaster) finalG.cityMaster = '';
+          finalG.cityMaster = name;
+        }
       }
     }
   }
@@ -1902,8 +1929,9 @@ function _importRosterFromRows(rows, fileName, nameEl){
     if(!name) continue;
     const groupName = colGroup>=0 ? String(row[colGroup]||'').trim() : '';
     const roleVal   = colRole>=0  ? String(row[colRole]||'').trim()  : '';
-    const isLeader  = roleVal==='组长' || roleVal.toLowerCase()==='leader';
-    rosterData.push({ name, groupName: groupName||'待分组', isLeader });
+    const isLeader     = roleVal==='组长' || roleVal.toLowerCase()==='leader';
+    const isCityMaster = roleVal==='城主' || roleVal.toLowerCase()==='citymaster' || roleVal.toLowerCase()==='city_master';
+    rosterData.push({ name, groupName: groupName||'待分组', isLeader, isCityMaster });
   }
 
   if(!rosterData.length){
@@ -1919,7 +1947,7 @@ function _importRosterFromRows(rows, fileName, nameEl){
     oldStudents.forEach(s => { delete masteredMap[s]; });
     // 清空分组，保留一个待分组
     GROUPS.length = 0;
-    GROUPS.push({id:'G1', name:'待分组', color:GRP_PALETTE[0], leader:'', members:[]});
+    GROUPS.push({id:'G1', name:'待分组', color:GRP_PALETTE[0], leader:'', cityMaster:'', members:[]});
   }
 
   // === 构建小组和学生 ===
@@ -1935,7 +1963,7 @@ function _importRosterFromRows(rows, fileName, nameEl){
       const newColor = freeColors[0] || GRP_PALETTE[GROUPS.length % GRP_PALETTE.length];
       const maxId = GROUPS.reduce((mx,g)=>Math.max(mx,parseInt(g.id.replace('G',''))||0),0);
       const newId = 'G'+(maxId+1);
-      targetG = {id:newId, name:groupName, color:newColor, leader:'', members:[]};
+      targetG = {id:newId, name:groupName, color:newColor, leader:'', cityMaster:'', members:[]};
       GROUPS.push(targetG);
       newGroups++;
     }
@@ -1960,6 +1988,11 @@ function _importRosterFromRows(rows, fileName, nameEl){
     if(isLeader){
       targetG.leader = name;
       leadersSet++;
+    }
+    // 设置城主
+    if(isCityMaster){
+      if(!targetG.cityMaster) targetG.cityMaster = '';
+      targetG.cityMaster = name;
     }
   });
 
@@ -2003,10 +2036,12 @@ function downloadRosterTemplate(){
     const wsData = [
       ['学生姓名', '组名', '角色'],
       ['张三', '第一小组', '组长'],
-      ['李四', '第一小组', ''],
-      ['王五', '第二小组', '组长'],
-      ['赵六', '第二小组', ''],
-      ['刘七', '待分组', ''],
+      ['李四', '第一小组', '城主'],
+      ['王五', '第一小组', ''],
+      ['赵六', '第二小组', '组长'],
+      ['刘七', '第二小组', '城主'],
+      ['陈八', '第二小组', ''],
+      ['吴九', '待分组', ''],
     ];
     const ws = XLSX.utils.aoa_to_sheet(wsData);
     // 设置列宽
