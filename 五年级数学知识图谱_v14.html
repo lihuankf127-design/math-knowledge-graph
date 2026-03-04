@@ -626,8 +626,10 @@ async function initApp(){
   try{
     const snap = await fbDB.ref(FB_PATH_CLASSES).once('value');
     const fbClasses = snap.val();
-    if(fbClasses && Array.isArray(fbClasses) && fbClasses.length){
-      CLASSES = fbClasses;
+    // Firebase可能将数组转为对象
+    const clsArr = fbClasses ? (Array.isArray(fbClasses) ? fbClasses : Object.values(fbClasses)) : null;
+    if(clsArr && clsArr.length){
+      CLASSES = clsArr;
       // 同步到 localStorage
       localStorage.setItem(LS_CLASSES, JSON.stringify(CLASSES));
     }
@@ -668,15 +670,22 @@ async function loadCurrentClassDataAsync(){
   }catch(e){ GROUPS = JSON.parse(JSON.stringify(DEFAULT_GROUPS)); }
   try{
     const rawData = localStorage.getItem(lsKeyData(curClassId));
-    if(rawData){ const p=JSON.parse(rawData); masteredMap={}; for(const k in p) masteredMap[k]=new Set(p[k]); }
+    if(rawData){ const p=JSON.parse(rawData); masteredMap={}; for(const k in p) masteredMap[k]=new Set((p[k]||[]).filter(x=>x!=='__none__')); }
     else masteredMap={};
   }catch(e){ masteredMap={}; }
   // 从 Firebase 加载最新数据
   try{
     const snapGrp = await fbDB.ref(fbPathGrp(curClassId)).once('value');
     const fbGrp = snapGrp.val();
-    if(fbGrp && Array.isArray(fbGrp) && fbGrp.length){
-      GROUPS = fbGrp;
+    // Firebase可能将数组转为对象，需要做数组化处理
+    const grpArr = fbGrp ? (Array.isArray(fbGrp) ? fbGrp : Object.values(fbGrp)) : null;
+    if(grpArr && grpArr.length){
+      GROUPS = grpArr.map(g=>({
+        ...g,
+        members: Array.isArray(g.members) ? g.members : (g.members ? Object.values(g.members) : []),
+        leader: g.leader || '',
+        cityMaster: g.cityMaster || ''
+      }));
       localStorage.setItem(lsKeyGrp(curClassId), JSON.stringify(GROUPS));
     }
   }catch(e){ console.warn('[FB] loadGroups', e); }
@@ -685,7 +694,10 @@ async function loadCurrentClassDataAsync(){
     const fbData = snapData.val();
     if(fbData && typeof fbData === 'object'){
       masteredMap={};
-      for(const k in fbData) masteredMap[k]=new Set(Array.isArray(fbData[k])?fbData[k]:Object.values(fbData[k]));
+      for(const k in fbData){
+        const arr = Array.isArray(fbData[k]) ? fbData[k] : (fbData[k] ? Object.values(fbData[k]) : []);
+        masteredMap[k] = new Set(arr.filter(x=>x!=='__none__'));
+      }
       const out={}; for(const k in masteredMap) out[k]=[...masteredMap[k]];
       localStorage.setItem(lsKeyData(curClassId), JSON.stringify(out));
     }
@@ -695,7 +707,11 @@ async function loadCurrentClassDataAsync(){
 function loadCurrentClassData(){ /* 已由 loadCurrentClassDataAsync 异步处理 */ }
 function saveData(){
   const out={};
-  for(const k in masteredMap) out[k]=[...masteredMap[k]];
+  // Firebase不存储空数组，用占位符确保学生记录不丢失
+  getAllStudents().forEach(s=>{
+    const arr = masteredMap[s] ? [...masteredMap[s]] : [];
+    out[s] = arr.length > 0 ? arr : ['__none__'];
+  });
   localStorage.setItem(lsKeyData(curClassId), JSON.stringify(out));
   if(fbDB) fbDB.ref(fbPathData(curClassId)).set(out).catch(e=>console.warn('[FB] saveData', e));
   broadcastSync();
@@ -754,6 +770,7 @@ function addClass(){
   localStorage.setItem(lsKeyGrp(cid), JSON.stringify(emptyGroups));
   if(fbDB) fbDB.ref(fbPathGrp(cid)).set(emptyGroups).catch(e=>console.warn('[FB] addClass groups', e));
   logAction('class', '新增班级「'+trimmed+'」');
+  updateClassSelect();  // 立即更新下拉列表（不等待switchClass异步回调）
   switchClass(cid);
 }
 
@@ -830,7 +847,8 @@ function getStudentGroup(name){
 }
 
 function isMastered(id){
-  return masteredMap[curStudent]?.has(id);
+  if(!curStudent || id === '__none__') return false;
+  return masteredMap[curStudent]?.has(id) || false;
 }
 
 // ================================================================
@@ -1196,6 +1214,7 @@ function hideTooltip(){ document.getElementById('tooltip').style.display='none';
 // ⑧ 掌握状态切换
 // ================================================================
 function toggleMastery(id){
+  if(!curStudent || id==='__none__') return;
   if(!masteredMap[curStudent]) masteredMap[curStudent]=new Set();
   const wasMastered = masteredMap[curStudent].has(id);
   if(wasMastered) masteredMap[curStudent].delete(id);
@@ -1224,8 +1243,10 @@ function toggleMastery(id){
 // ================================================================
 function getStudentMasteryPct(name){
   const s = masteredMap[name];
-  if(!s) return 0;
-  return Math.round(s.size / NODES.length * 100);
+  if(!s||!s.size) return 0;
+  // 过滤占位符
+  const realCount = [...s].filter(x=>x!=='__none__').length;
+  return Math.round(realCount/NODES.length*100);
 }
 
 function buildStudentPanel(){
@@ -2208,7 +2229,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
       const rawGrp = localStorage.getItem(lsKeyGrp(curClassId));
       if(rawGrp) GROUPS = JSON.parse(rawGrp);
       const rawData = localStorage.getItem(lsKeyData(curClassId));
-      if(rawData){ const p=JSON.parse(rawData); for(const k in p) masteredMap[k]=new Set(p[k]); }
+      if(rawData){ const p=JSON.parse(rawData); for(const k in p) masteredMap[k]=new Set((p[k]||[]).filter(x=>x!=='__none__')); }
     }
   }catch(e){}
   // 快速渲染页面
