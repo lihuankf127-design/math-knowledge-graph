@@ -1,0 +1,12 @@
+Firebase 配置信息（从截图读取）:
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBxn-v9oPlJ09byI-euYFXrcteuOunj8lM",
+  authDomain: "math-knowledge-graph-e4b08.firebaseapp.com",
+  databaseURL: "https://math-knowledge-graph-e4b08-default-rtdb.firebaseio.com",
+  projectId: "math-knowledge-graph-e4b08",
+  storageBucket: "math-knowledge-graph-e4b08.firebasestorage.app",
+  messagingSenderId: "537271417574",
+  appId: "1:537271417574:web:a904a5fb3c19f138c29727",
+  measurementId: "G-LR2LW7Z88G"
+};
